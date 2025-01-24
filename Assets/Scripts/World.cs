@@ -1,9 +1,15 @@
+using System;
 using UnityEngine;
 
 public class World : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+	internal BlockType GetBlockFromChunkCoordinates(ChunkData chunkData, int v1, int v2, int v3)
+	{
+		throw new NotImplementedException();
+	}
+
+	// Start is called once before the first execution of Update after the MonoBehaviour is created
+	void Start()
     {
         
     }
