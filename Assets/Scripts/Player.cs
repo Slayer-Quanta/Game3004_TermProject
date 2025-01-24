@@ -59,7 +59,7 @@ public class Player : MonoBehaviour
         }
         else
         {
-            Animator.SetBool("isMoving", false);
+            //Animator.SetBool("isMoving", false);
         }
     }
     #endregion
