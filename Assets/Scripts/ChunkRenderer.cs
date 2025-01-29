@@ -1,7 +1,8 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -12,6 +13,7 @@ public class ChunkRenderer : MonoBehaviour
 	MeshCollider meshCollider;
 	Mesh mesh;
 	public bool showGizmo = false;
+
 	public ChunkData ChunkData { get; private set; }
 
 	public bool ModifiedByThePlayer
@@ -24,8 +26,6 @@ public class ChunkRenderer : MonoBehaviour
 		{
 			ChunkData.modifiedByThePlayer = value;
 		}
-
-
 	}
 
 	private void Awake()
@@ -61,6 +61,7 @@ public class ChunkRenderer : MonoBehaviour
 
 		meshCollider.sharedMesh = collisionMesh;
 	}
+
 	public void UpdateChunk()
 	{
 		RenderMesh(Chunk.GetChunkMeshData(ChunkData));

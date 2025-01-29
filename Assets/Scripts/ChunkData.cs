@@ -1,7 +1,8 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.LightTransport;
 
-public class ChunkData 
+public class ChunkData
 {
 	public BlockType[] blocks;
 	public int chunkSize = 16;
@@ -19,4 +20,5 @@ public class ChunkData
 		this.worldPosition = worldPosition;
 		blocks = new BlockType[chunkSize * chunkHeight * chunkSize];
 	}
+
 }
