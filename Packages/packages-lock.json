@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.lufias.helper": {
+      "version": "https://github.com/lufias-69/helper-unity.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "51906591af0e145a3d4bc0631c28da4eb3fc5a2e"
+    },
     "com.unity.adaptiveperformance": {
       "version": "5.1.0",
       "depth": 1,
