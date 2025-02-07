@@ -12,7 +12,11 @@ public class Enemy : MonoBehaviour
     Vector3 targetPos;
     public bool isBypassing;
 
+    public float detectionArea;
     float step;
+
+    [ReadOnlyLUFI] public bool isPlayerDetected;
+    bool flag;
 
     private void Start()
     {
@@ -22,23 +26,45 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
-        if (!isFrontBlocked && !isBypassing)
+        if (isPlayerDetected)
         {
-            SetTargetPos(player.position);
-            transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
-        }
-        else
-        {
-            if (!isBypassing)
+            if (!isFrontBlocked && !isBypassing)
             {
-                CheckBypass();
+                SetTargetPos(player.position);
+                transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
+            }
+            else
+            {
+                if (!isBypassing)
+                {
+                    CheckBypass();
+                }
             }
         }
     }
 
     private void FixedUpdate()
     {
+        isPlayerDetected = Vector3.Distance(transform.position, player.position) < detectionArea;
+
         isFrontBlocked = Physics.Raycast(transform.position, transform.forward, rayDist);
+
+        PlayChaseMusic(isPlayerDetected);
+    }
+
+    void PlayChaseMusic(bool isChasing)
+    {
+        if (isChasing == flag) return;
+        flag = isChasing;
+
+        if (isChasing)
+        {
+            SoundManager.self.PlayEnemyChaseMusic();
+        }
+        else
+        {
+            SoundManager.self.PlayGamePlayMusic();
+        }
     }
 
     void CheckBypass()
@@ -129,5 +155,8 @@ public class Enemy : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawRay(transform.position - (transform.right * step), transform.forward * rayDist);
         Gizmos.DrawRay(transform.position + (transform.right * step), transform.forward * rayDist);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, detectionArea);
     }
 }
