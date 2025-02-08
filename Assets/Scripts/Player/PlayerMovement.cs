@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -7,6 +5,9 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField]
 	private CharacterController controller;
 
+	[SerializeField] SoundPlayer sound;
+
+	[Space]
 	[SerializeField]
 	private float playerSpeed = 5.0f, playerRunSpeed = 8;
 	[SerializeField]
@@ -55,7 +56,23 @@ public class PlayerMovement : MonoBehaviour
 
 	public void Walk(Vector3 movementInput, bool runningInput)
 	{
-		Vector3 movementDirection = GetMovementDirection(movementInput);
+		if (movementInput != Vector3.zero)
+        {
+            if (runningInput)
+            {
+                sound.ChangeState(MoveState.Run);
+            }
+            else
+            {
+                sound.ChangeState(MoveState.Walk);
+            }
+        }
+        else
+        {
+            sound.ChangeState(MoveState.None);
+        }
+
+        Vector3 movementDirection = GetMovementDirection(movementInput);
 		float speed = runningInput ? playerRunSpeed : playerSpeed;
 		controller.Move(movementDirection * Time.deltaTime * speed);
 	}
@@ -76,7 +93,8 @@ public class PlayerMovement : MonoBehaviour
 	{
 		//playerVelocity.y = Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
 		playerVelocity.y = jumpHeight;
-	}
+        sound.PlayJumpSound();
+    }
 
 	private void ApplyGravityForce()
 	{
@@ -84,7 +102,7 @@ public class PlayerMovement : MonoBehaviour
 		playerVelocity.y = Mathf.Clamp(playerVelocity.y, gravityValue, 10);
 	}
 
-	private void Update()
+	private void FixedUpdate()
 	{
 		IsGrounded = Physics.Raycast(transform.position, Vector3.down, rayDistance, groundMask);
 	}
