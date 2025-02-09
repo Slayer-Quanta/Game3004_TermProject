@@ -119,6 +119,167 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &36019595
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 362.36246
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 248.17923
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.223755
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4087526416867546613, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_Name
+      value: Audio Manager
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[0].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: cda15fb987080f542a697b7b50a567fa, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[0].name
+      value: Button Click
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[1].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: b6cf7d5cf9aebc0489381aaea61de74a, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[1].name
+      value: Jump
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[2].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: de3715c3831132542a7785a1cdb008cf, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[2].name
+      value: Walk
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[3].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: b6e57b07ac05d9046b9f9e4e32889a40, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[3].name
+      value: Attack
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[4].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 7b6876a1db0b7bc408e1a72f0629e6fa, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[4].name
+      value: Pickup
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[0].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 52a20d4ff2305f9478c9a6b0d28f9a3e, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[0].name
+      value: Menu Background Music
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[1].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 47b67fb71bad41749a7fc8da6217f3c4, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[1].name
+      value: Achievements Background Music
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[2].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 73836555fc68bcd469c4f2aea4cd9ab0, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[2].name
+      value: GameOver Background Music
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[3].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: d87b526c3186c57408e45db9e962d52d, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[3].name
+      value: GameWin Background Music
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[4].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: d87b526c3186c57408e45db9e962d52d, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[4].name
+      value: Instructions Background Music
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[5].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 74c18e6656638fb4facbed1bc99be698, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[5].name
+      value: Options Background Music
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[6].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: badcecac334f6954b96b03d111a15e8e, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: musicSounds.Array.data[6].name
+      value: Sample Background Music
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
 --- !u!1 &63806739
 GameObject:
   m_ObjectHideFlags: 0
@@ -1150,3 +1311,4 @@ SceneRoots:
   - {fileID: 1380468438}
   - {fileID: 549377362}
   - {fileID: 63806742}
+  - {fileID: 36019595}
