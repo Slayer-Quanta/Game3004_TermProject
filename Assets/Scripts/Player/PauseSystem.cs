@@ -1,8 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems; // Add this for UI input handling
 
 public class PauseSystem : MonoBehaviour
 {
+    public Image healthBar;
+    public GameObject healthBarCanvas;
     public GameObject pauseMenuUI;
     public Button resumeButton, saveButton, loadButton, quitButton;
 
@@ -19,12 +22,40 @@ public class PauseSystem : MonoBehaviour
     {
         bool isPaused = !pauseMenuUI.activeSelf;
         pauseMenuUI.SetActive(isPaused);
-        Time.timeScale = isPaused ? 0 : 1;
-    }
 
-    private void ResumeGame()
+        Time.timeScale = isPaused ? 0 : 1;
+
+        if (healthBarCanvas != null)
+        {
+            healthBarCanvas.SetActive(false);
+        }
+
+         
+        
+
+        if (isPaused)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+         
+            EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+    }
+    
+
+    public void ResumeGame()
     {
-        TogglePause();
+        Time.timeScale = 1;  
+        pauseMenuUI.SetActive(false);
+        healthBarCanvas.SetActive(true);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void SaveGame()
