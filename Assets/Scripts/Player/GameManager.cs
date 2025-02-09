@@ -1,8 +1,5 @@
 using Unity.Cinemachine;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -16,8 +13,9 @@ public class GameManager : MonoBehaviour
 
 	public float detectionTime = 1;
 	public CinemachineCamera camera_VM;
+	public CinemachineBrain cameraBrain;
 
-	public void SpawnPlayer()
+    public void SpawnPlayer()
 	{
 		if (player != null)
 			return;
@@ -28,6 +26,7 @@ public class GameManager : MonoBehaviour
 
 			player = Instantiate(playerPrefab, hit.point + Vector3Int.up, Quaternion.identity);
 			camera_VM.Follow = player.transform.GetChild(0);
+			cameraBrain.enabled = true;
 			StartCheckingTheMap();
 		}
 	}
