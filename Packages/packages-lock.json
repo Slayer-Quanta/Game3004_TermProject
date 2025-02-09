@@ -1,5 +1,18 @@
 {
   "dependencies": {
+    "com.lufias.helper": {
+      "version": "https://github.com/lufias-69/helper-unity.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "51906591af0e145a3d4bc0631c28da4eb3fc5a2e"
+    },
+    "com.unity.2d.sprite": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
     "com.unity.adaptiveperformance": {
       "version": "5.1.0",
       "depth": 1,
@@ -41,8 +54,8 @@
       "source": "registry",
       "dependencies": {
         "com.unity.burst": "1.8.17",
-        "com.unity.nuget.mono-cecil": "1.11.4",
         "com.unity.test-framework": "1.4.5",
+        "com.unity.nuget.mono-cecil": "1.11.4",
         "com.unity.test-framework.performance": "3.0.3"
       },
       "url": "https://packages.unity.com"
@@ -59,7 +72,7 @@
       "depth": 0,
       "source": "builtin",
       "dependencies": {
-        "com.unity.mobile.android-logcat": "1.4.3",
+        "com.unity.mobile.android-logcat": "1.4.4",
         "com.unity.adaptiveperformance": "5.1.0",
         "com.unity.mobile.notifications": "2.4.0"
       }
@@ -99,7 +112,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.mobile.android-logcat": {
-      "version": "1.4.3",
+      "version": "1.4.4",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
@@ -203,13 +216,12 @@
       }
     },
     "com.unity.splines": {
-      "version": "2.6.1",
+      "version": "2.7.2",
       "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.settings-manager": "1.0.3",
         "com.unity.mathematics": "1.2.1",
-        "com.unity.ugui": "1.0.0"
+        "com.unity.settings-manager": "1.0.3"
       },
       "url": "https://packages.unity.com"
     },
@@ -239,9 +251,9 @@
       "depth": 0,
       "source": "registry",
       "dependencies": {
+        "com.unity.modules.audio": "1.0.0",
         "com.unity.modules.director": "1.0.0",
         "com.unity.modules.animation": "1.0.0",
-        "com.unity.modules.audio": "1.0.0",
         "com.unity.modules.particlesystem": "1.0.0"
       },
       "url": "https://packages.unity.com"

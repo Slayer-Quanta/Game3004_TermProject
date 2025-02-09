@@ -237,7 +237,7 @@ MonoBehaviour:
   flySpeed: 2
   groundMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   rayDistance: 0.12
   <IsGrounded>k__BackingField: 0
 --- !u!114 &7040412690683803284
