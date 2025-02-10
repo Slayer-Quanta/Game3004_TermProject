@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Character : MonoBehaviour
@@ -10,9 +9,6 @@ public class Character : MonoBehaviour
 	private PlayerInput playerInput;
 	[SerializeField]
 	private PlayerMovement playerMovement;
-
-    [SerializeField] 
-	private PauseSystem pauseMenu;
 
     public float interactionRayLength = 5;
 
@@ -25,7 +21,6 @@ public class Character : MonoBehaviour
 
 	bool isWaiting = false;
 
-	public World world;
 
 	private void Awake()
 	{
@@ -33,7 +28,6 @@ public class Character : MonoBehaviour
 			mainCamera = Camera.main;
 		playerInput = GetComponent<PlayerInput>();
 		playerMovement = GetComponent<PlayerMovement>();
-		world = FindObjectOfType<World>();
 	}
 
 	private void Start()
@@ -41,11 +35,17 @@ public class Character : MonoBehaviour
 		playerInput.OnMouseClick += HandleMouseClick;
 		playerInput.OnFly += HandleFlyClick;
 
-        pauseMenu = FindObjectOfType<PauseSystem>();
-        playerInput.OnPause += pauseMenu.TogglePause;
+        playerInput.OnPause += PauseSystem.self.TogglePause;
     }
 
-	private void HandleFlyClick()
+    private void OnDestroy()
+    {
+        playerInput.OnMouseClick -= HandleMouseClick;
+        playerInput.OnFly -= HandleFlyClick;
+        playerInput.OnPause -= PauseSystem.self.TogglePause;
+    }
+
+    private void HandleFlyClick()
 	{
 		fly = !fly;
 	}
@@ -98,7 +98,7 @@ public class Character : MonoBehaviour
 
 	private void ModifyTerrain(RaycastHit hit)
 	{
-		world.SetBlock(hit, BlockType.Air);
+		World.self.SetBlock(hit, BlockType.Air);
 	}
 
 

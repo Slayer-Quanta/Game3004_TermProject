@@ -5,8 +5,6 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField]
 	private CharacterController controller;
 
-	[SerializeField] SoundPlayer sound;
-
 	[Space]
 	[SerializeField]
 	private float playerSpeed = 5.0f, playerRunSpeed = 8;
@@ -56,23 +54,7 @@ public class PlayerMovement : MonoBehaviour
 
 	public void Walk(Vector3 movementInput, bool runningInput)
 	{
-		if (movementInput != Vector3.zero)
-        {
-            if (runningInput)
-            {
-                sound.ChangeState(MoveState.Run);
-            }
-            else
-            {
-                sound.ChangeState(MoveState.Walk);
-            }
-        }
-        else
-        {
-            sound.ChangeState(MoveState.None);
-        }
-
-        Vector3 movementDirection = GetMovementDirection(movementInput);
+		Vector3 movementDirection = GetMovementDirection(movementInput);
 		float speed = runningInput ? playerRunSpeed : playerSpeed;
 		controller.Move(movementDirection * Time.deltaTime * speed);
 	}
@@ -93,7 +75,6 @@ public class PlayerMovement : MonoBehaviour
 	{
 		//playerVelocity.y = Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
 		playerVelocity.y = jumpHeight;
-        sound.PlayJumpSound();
     }
 
 	private void ApplyGravityForce()
