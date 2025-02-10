@@ -22,9 +22,9 @@ MonoBehaviour:
     isSolid: 0
     generatesCollider: 0
   - blockType: 2
-    up: {x: 6, y: 8}
-    down: {x: 7, y: 4}
-    side: {x: 7, y: 5}
+    up: {x: 5, y: 8}
+    down: {x: 7, y: 5}
+    side: {x: 7, y: 4}
     isSolid: 1
     generatesCollider: 1
   - blockType: 3

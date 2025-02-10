@@ -11,7 +11,9 @@ public class PlayerInput : MonoBehaviour
 	public Vector2 MousePosition { get; private set; }
 	public bool IsJumping { get; private set; }
 
-	void Update()
+    public event Action OnPause;
+
+    void Update()
 	{
 		GetMouseClick();
 		GetMousePosition();
@@ -19,7 +21,8 @@ public class PlayerInput : MonoBehaviour
 		GetJumpInput();
 		GetRunInput();
 		GetFlyInput();
-	}
+        GetPauseInput();
+    }
 
 	private void GetFlyInput()
 	{
@@ -57,4 +60,11 @@ public class PlayerInput : MonoBehaviour
 
 		}
 	}
+    private void GetPauseInput()
+    {
+        if (Input.GetKeyDown(KeyCode.E)) 
+        {
+            OnPause?.Invoke();
+        }
+    }
 }

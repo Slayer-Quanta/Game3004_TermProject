@@ -11,7 +11,10 @@ public class Character : MonoBehaviour
 	[SerializeField]
 	private PlayerMovement playerMovement;
 
-	public float interactionRayLength = 5;
+    [SerializeField] 
+	private PauseSystem pauseMenu;
+
+    public float interactionRayLength = 5;
 
 	public LayerMask groundMask;
 
@@ -37,7 +40,10 @@ public class Character : MonoBehaviour
 	{
 		playerInput.OnMouseClick += HandleMouseClick;
 		playerInput.OnFly += HandleFlyClick;
-	}
+
+        pauseMenu = FindObjectOfType<PauseSystem>();
+        playerInput.OnPause += pauseMenu.TogglePause;
+    }
 
 	private void HandleFlyClick()
 	{
