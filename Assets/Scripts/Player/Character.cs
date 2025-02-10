@@ -46,63 +46,76 @@ public class Character : MonoBehaviour
 		fly = !fly;
 	}
 
-	void Update()
-	{
-		if (fly)
-		{
-			animator.SetFloat("speed", 0);
-			animator.SetBool("isGrounded", false);
-			animator.ResetTrigger("jump");
-			playerMovement.Fly(playerInput.MovementInput, playerInput.IsJumping, playerInput.RunningPressed);
-		}
-		else
-		{
-			animator.SetBool("isGrounded", playerMovement.IsGrounded);
-			if (playerMovement.IsGrounded && playerInput.IsJumping && isWaiting == false)
-			{
-				animator.SetTrigger("jump");
-				isWaiting = true;
-				StopAllCoroutines();
-				StartCoroutine(ResetWaiting());
-			}
-			animator.SetFloat("speed", playerInput.MovementInput.magnitude);
-			playerMovement.HandleGravity(playerInput.IsJumping);
-			playerMovement.Walk(playerInput.MovementInput, playerInput.RunningPressed);
-		}
-	}
+    void Update()
+    {
+        if (fly)
+        {
+            animator.SetFloat("speed", 0);
+            animator.SetBool("isGrounded", false);
+            animator.ResetTrigger("jump");
+            playerMovement.Fly(playerInput.MovementInput, playerInput.IsJumping, playerInput.RunningPressed);
+        }
+        else
+        {
+            animator.SetBool("isGrounded", playerMovement.IsGrounded);
 
-	IEnumerator ResetWaiting()
+            if (playerMovement.IsGrounded && playerInput.IsJumping && isWaiting == false)
+            {
+                animator.SetTrigger("jump");
+                AudioManager.instance.PlayJumpSound(); 
+                isWaiting = true;
+                StopAllCoroutines();
+                StartCoroutine(ResetWaiting());
+            }
+
+            animator.SetFloat("speed", playerInput.MovementInput.magnitude);
+
+            if (playerMovement.IsGrounded && playerInput.MovementInput.magnitude > 0)
+            {
+                if (!AudioManager.instance.sfxSource.isPlaying) 
+                    AudioManager.instance.PlayWalkSound();
+            }
+
+            playerMovement.HandleGravity(playerInput.IsJumping);
+            playerMovement.Walk(playerInput.MovementInput, playerInput.RunningPressed);
+        }
+    }
+
+
+    IEnumerator ResetWaiting()
 	{
 		yield return new WaitForSeconds(0.1f);
 		animator.ResetTrigger("jump");
 		isWaiting = false;
 	}
 
-	private void HandleMouseClick()
-	{
-		Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
-		RaycastHit hit;
+    private void HandleMouseClick()
+    {
+        AudioManager.instance.PlayButtonClick(); 
 
-		if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
-		{
-			Vector3Int clickedBlockPos = new Vector3Int(Mathf.RoundToInt(hit.point.x), Mathf.RoundToInt(hit.point.y), Mathf.RoundToInt(hit.point.z));
+        Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
+        RaycastHit hit;
 
-			// Check if the clicked block is the same as the last one
-			if (clickedBlockPos == lastClickedBlockPos && Time.time - lastClickTime <= doubleClickThreshold)
-			{
-				// Double-clicked, destroy the block
-				ModifyTerrain(hit);
-			}
-			else
-			{
-				// First click, record the time and block position
-				lastClickedBlockPos = clickedBlockPos;
-				lastClickTime = Time.time;
-			}
-		}
-	}
+        if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
+        {
+            Vector3Int clickedBlockPos = new Vector3Int(Mathf.RoundToInt(hit.point.x), Mathf.RoundToInt(hit.point.y), Mathf.RoundToInt(hit.point.z));
 
-	private void ModifyTerrain(RaycastHit hit)
+            // Check if the clicked block is the same as the last one
+            if (clickedBlockPos == lastClickedBlockPos && Time.time - lastClickTime <= doubleClickThreshold)
+            {
+                // Double-clicked, destroy the block
+                ModifyTerrain(hit);
+            }
+            else
+            {
+                // First click, record the time and block position
+                lastClickedBlockPos = clickedBlockPos;
+                lastClickTime = Time.time;
+            }
+        }
+    }
+
+    private void ModifyTerrain(RaycastHit hit)
 	{
 		world.SetBlock(hit, BlockType.Air);
 	}
