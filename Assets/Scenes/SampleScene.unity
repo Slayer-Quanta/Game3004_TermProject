@@ -2451,6 +2451,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   musicVolumeSlider: {fileID: 1630767019}
+  sfxVolumeSlider: {fileID: 1630767019}
 --- !u!4 &934084077
 Transform:
   m_ObjectHideFlags: 0
@@ -3112,6 +3113,14 @@ PrefabInstance:
     - target: {fileID: 283564122371400193, guid: 7c10f72d05ac75246ad782c667c2feab, type: 3}
       propertyPath: m_Name
       value: BgMusic
+      objectReference: {fileID: 0}
+    - target: {fileID: 442270901812868988, guid: 7c10f72d05ac75246ad782c667c2feab, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5793069710834323474, guid: 7c10f72d05ac75246ad782c667c2feab, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

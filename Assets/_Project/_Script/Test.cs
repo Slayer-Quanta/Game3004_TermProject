@@ -1,27 +1,48 @@
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Test : MonoBehaviour
 {
     public Slider musicVolumeSlider;
+    public Slider sfxVolumeSlider;
 
     private void Start()
     {
-        SoundManager.self.PlayMenuMusic();
-        
-        musicVolumeSlider.value = PlayerPrefs.GetFloat("MusicVolume", 1);
-        SliderValueChange(musicVolumeSlider.value);
+        if (AudioManager.instance != null)
+        {
+            // Load saved volume levels
+            float savedMusicVolume = PlayerPrefs.GetFloat("MusicVolume", 1);
+            float savedSFXVolume = PlayerPrefs.GetFloat("SFXVolume", 1);
+
+            musicVolumeSlider.value = savedMusicVolume;
+            sfxVolumeSlider.value = savedSFXVolume;
+
+            AudioManager.instance.SetMusicVolume(savedMusicVolume);
+            AudioManager.instance.SetSFXVolume(savedSFXVolume);
+        }
+
+        // Add listeners to detect when sliders are moved
+        musicVolumeSlider.onValueChanged.AddListener(SetMusicVolume);
+        sfxVolumeSlider.onValueChanged.AddListener(SetSFXVolume);
     }
 
-    public void SliderValueChange(float value)
+    public void SetMusicVolume(float value)
     {
-        SoundManager.self.ChangeVolume(value);
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.SetMusicVolume(value);
+            PlayerPrefs.SetFloat("MusicVolume", value);
+            PlayerPrefs.Save();
+        }
     }
 
-    public void Btn_Play()
+    public void SetSFXVolume(float value)
     {
-        SoundManager.self.PlayGamePlayMusic();
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.SetSFXVolume(value);
+            PlayerPrefs.SetFloat("SFXVolume", value);
+            PlayerPrefs.Save();
+        }
     }
 }
