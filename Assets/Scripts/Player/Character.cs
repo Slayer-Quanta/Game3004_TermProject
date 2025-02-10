@@ -4,28 +4,20 @@ using UnityEngine;
 
 public class Character : MonoBehaviour
 {
-	[SerializeField]
-	private Camera mainCamera;
-	[SerializeField]
-	private PlayerInput playerInput;
-	[SerializeField]
-	private PlayerMovement playerMovement;
+	[SerializeField] private Camera mainCamera;
+	[SerializeField] private PlayerInput playerInput;
+	[SerializeField] private PlayerMovement playerMovement;
 
-    [SerializeField] 
-	private PauseSystem pauseMenu;
-
-    public float interactionRayLength = 5;
-
+	public float interactionRayLength = 5;
 	public LayerMask groundMask;
-
-
 	public bool fly = false;
-
 	public Animator animator;
-
 	bool isWaiting = false;
-
 	public World world;
+
+	private float lastClickTime = 0f;
+	private float doubleClickThreshold = 0.5f; // Time window for double-click in seconds
+	private Vector3Int lastClickedBlockPos = Vector3Int.zero;
 
 	private void Awake()
 	{
@@ -40,10 +32,7 @@ public class Character : MonoBehaviour
 	{
 		playerInput.OnMouseClick += HandleMouseClick;
 		playerInput.OnFly += HandleFlyClick;
-
-        pauseMenu = FindObjectOfType<PauseSystem>();
-        playerInput.OnPause += pauseMenu.TogglePause;
-    }
+	}
 
 	private void HandleFlyClick()
 	{
@@ -58,7 +47,6 @@ public class Character : MonoBehaviour
 			animator.SetBool("isGrounded", false);
 			animator.ResetTrigger("jump");
 			playerMovement.Fly(playerInput.MovementInput, playerInput.IsJumping, playerInput.RunningPressed);
-
 		}
 		else
 		{
@@ -73,11 +61,9 @@ public class Character : MonoBehaviour
 			animator.SetFloat("speed", playerInput.MovementInput.magnitude);
 			playerMovement.HandleGravity(playerInput.IsJumping);
 			playerMovement.Walk(playerInput.MovementInput, playerInput.RunningPressed);
-
-
 		}
-
 	}
+
 	IEnumerator ResetWaiting()
 	{
 		yield return new WaitForSeconds(0.1f);
@@ -89,19 +75,28 @@ public class Character : MonoBehaviour
 	{
 		Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
 		RaycastHit hit;
+
 		if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
 		{
-			ModifyTerrain(hit);
-		}
+			Vector3Int clickedBlockPos = new Vector3Int(Mathf.RoundToInt(hit.point.x), Mathf.RoundToInt(hit.point.y), Mathf.RoundToInt(hit.point.z));
 
+			// Check if the clicked block is the same as the last one
+			if (clickedBlockPos == lastClickedBlockPos && Time.time - lastClickTime <= doubleClickThreshold)
+			{
+				// Double-clicked, destroy the block
+				ModifyTerrain(hit);
+			}
+			else
+			{
+				// First click, record the time and block position
+				lastClickedBlockPos = clickedBlockPos;
+				lastClickTime = Time.time;
+			}
+		}
 	}
 
 	private void ModifyTerrain(RaycastHit hit)
 	{
 		world.SetBlock(hit, BlockType.Air);
 	}
-
-
-
-
 }
