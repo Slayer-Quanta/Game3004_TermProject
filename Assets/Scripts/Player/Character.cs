@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Character : MonoBehaviour
@@ -25,7 +24,6 @@ public class Character : MonoBehaviour
 			mainCamera = Camera.main;
 		playerInput = GetComponent<PlayerInput>();
 		playerMovement = GetComponent<PlayerMovement>();
-		world = FindObjectOfType<World>();
 	}
 
 	private void Start()
@@ -34,7 +32,14 @@ public class Character : MonoBehaviour
 		playerInput.OnFly += HandleFlyClick;
 	}
 
-	private void HandleFlyClick()
+    private void OnDestroy()
+    {
+        playerInput.OnMouseClick -= HandleMouseClick;
+        playerInput.OnFly -= HandleFlyClick;
+        playerInput.OnPause -= PauseSystem.self.TogglePause;
+    }
+
+    private void HandleFlyClick()
 	{
 		fly = !fly;
 	}
@@ -97,6 +102,6 @@ public class Character : MonoBehaviour
 
 	private void ModifyTerrain(RaycastHit hit)
 	{
-		world.SetBlock(hit, BlockType.Air);
+		World.self.SetBlock(hit, BlockType.Air);
 	}
 }

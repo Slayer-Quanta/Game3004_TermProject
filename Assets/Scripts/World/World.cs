@@ -10,6 +10,8 @@ using UnityEngine.Events;
 
 public class World : MonoBehaviour
 {
+	public static World self;
+
 	public int mapSizeInChunks = 6;
 	public int chunkSize = 16, chunkHeight = 100;
 	public int chunkDrawingRange = 8;
@@ -33,6 +35,8 @@ public class World : MonoBehaviour
 
 	private void Awake()
 	{
+		self = this;
+
 		worldData = new WorldData
 		{
 			chunkHeight = this.chunkHeight,

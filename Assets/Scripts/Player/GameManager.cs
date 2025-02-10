@@ -1,12 +1,12 @@
 using Unity.Cinemachine;
 using System.Collections;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
 	public GameObject playerPrefab;
-	private GameObject player;
-	public Vector3Int currentPlayerChunkPosition;
+    public Vector3Int currentPlayerChunkPosition;
 	private Vector3Int currentChunkCenter = Vector3Int.zero;
 
 	public World world;
@@ -14,6 +14,14 @@ public class GameManager : MonoBehaviour
 	public float detectionTime = 1;
 	public CinemachineCamera camera_VM;
 	public CinemachineBrain cameraBrain;
+	public GameObject player { get; private set; }
+
+	[Header("Enemy")]
+	public Enemy enemyPrefab;
+	public int enemyCount = 10;
+	public Vector2 enemySpawnRangeX = new Vector2(-100, 100);
+	public Vector2 enemySpawnRangeY = new Vector2(-100, 100);
+    List<Enemy> enemies = new List<Enemy>();
 
     public void SpawnPlayer()
 	{
@@ -28,10 +36,23 @@ public class GameManager : MonoBehaviour
 			camera_VM.Follow = player.transform.GetChild(0);
 			cameraBrain.enabled = true;
 			StartCheckingTheMap();
-		}
+
+            SpawnEnemies();
+        }
 	}
 
-	public void StartCheckingTheMap()
+    void SpawnEnemies()
+    {
+        for (int i = 0; i < enemyCount; i++)
+        {
+            Vector3 spawnPosition = new Vector3(Random.Range(enemySpawnRangeX.x, enemySpawnRangeX.y), 100, Random.Range(enemySpawnRangeY.x, enemySpawnRangeY.y));
+            Enemy enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+            enemy.Init(player.transform);
+            enemies.Add(enemy);
+        }
+    }
+
+    public void StartCheckingTheMap()
 	{
 		SetCurrentChunkCoordinates();
 		StopAllCoroutines();
