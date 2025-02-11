@@ -172,6 +172,18 @@ PrefabInstance:
       value: Audio Manager
       objectReference: {fileID: 0}
     - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[5].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: cda15fb987080f542a697b7b50a567fa, type: 3}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: sfxSounds.Array.data[5].name
+      value: Inventory Toggle
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266577970928039609, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
       propertyPath: musicSounds.Array.data[6].clip
       value: 
       objectReference: {fileID: 8300000, guid: 5b59cce20f4d42a48b3069957f936fe4, type: 3}

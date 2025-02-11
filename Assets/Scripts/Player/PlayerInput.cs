@@ -13,6 +13,8 @@ public class PlayerInput : MonoBehaviour
 
     public event Action OnPause;
 
+    public event Action OnInventoryToggle;
+
     void Update()
 	{
 		GetMouseClick();
@@ -22,6 +24,7 @@ public class PlayerInput : MonoBehaviour
 		GetRunInput();
 		GetFlyInput();
         GetPauseInput();
+		GetInventoryInput();
     }
 
 	private void GetFlyInput()
@@ -65,6 +68,14 @@ public class PlayerInput : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E)) 
         {
             OnPause?.Invoke();
+        }
+    }
+
+    private void GetInventoryInput()
+    {
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            OnInventoryToggle?.Invoke();
         }
     }
 }

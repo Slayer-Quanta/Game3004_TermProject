@@ -8,8 +8,9 @@ public class Character : MonoBehaviour
 	[SerializeField] private PlayerInput playerInput;
 	[SerializeField] private PlayerMovement playerMovement;
 
-	public float interactionRayLength = 5;
-	public LayerMask groundMask;
+    [SerializeField] private PauseSystem pauseMenu;
+    public float interactionRayLength = 5;
+    public LayerMask groundMask;
 	public bool fly = false;
 	public Animator animator;
 	bool isWaiting = false;
@@ -32,13 +33,18 @@ public class Character : MonoBehaviour
 	{
 		playerInput.OnMouseClick += HandleMouseClick;
 		playerInput.OnFly += HandleFlyClick;
-	}
+
+        pauseMenu = FindObjectOfType<PauseSystem>();
+        playerInput.OnPause += pauseMenu.TogglePause;
+        playerInput.OnInventoryToggle += ToggleInventory;
+    }
 
     private void OnDestroy()
     {
         playerInput.OnMouseClick -= HandleMouseClick;
         playerInput.OnFly -= HandleFlyClick;
         playerInput.OnPause -= PauseSystem.self.TogglePause;
+        playerInput.OnInventoryToggle -= ToggleInventory;
     }
 
     private void HandleFlyClick()
@@ -113,6 +119,10 @@ public class Character : MonoBehaviour
                 lastClickTime = Time.time;
             }
         }
+    }
+    private void ToggleInventory()
+    {
+        AudioManager.instance.PlaySFX("Inventory Toggle");
     }
 
     private void ModifyTerrain(RaycastHit hit)
