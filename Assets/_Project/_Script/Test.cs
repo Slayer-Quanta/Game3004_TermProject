@@ -1,16 +1,22 @@
+using Helper.Waiter;
+using Unity.AI.Navigation;
 using UnityEngine;
-using UnityEngine.UI;
+
 
 public class Test : MonoBehaviour
 {
     public Transform player;
-    public Transform enemy;
+    public Enemy enemy;
+    public NavMeshSurface navMeshSurface;
 
-    public float dir;
-
-    
-    public void Update()
+    [ButtonLUFI]
+    void T()
     {
-        dir = Vector3.SignedAngle(enemy.forward, player.position, Vector3.up);
+        navMeshSurface.BuildNavMesh();
+
+        Waiter.WaitEndOffFrame(1, () =>
+        {
+            enemy.Init(player);
+        });
     }
 }
