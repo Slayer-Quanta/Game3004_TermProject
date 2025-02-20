@@ -11,7 +11,11 @@ public class PlayerInput : MonoBehaviour
 	public Vector2 MousePosition { get; private set; }
 	public bool IsJumping { get; private set; }
 
-	void Update()
+    public event Action OnPause;
+
+    public event Action OnInventoryToggle;
+
+    void Update()
 	{
 		GetMouseClick();
 		GetMousePosition();
@@ -19,7 +23,9 @@ public class PlayerInput : MonoBehaviour
 		GetJumpInput();
 		GetRunInput();
 		GetFlyInput();
-	}
+        GetPauseInput();
+		GetInventoryInput();
+    }
 
 	private void GetFlyInput()
 	{
@@ -57,4 +63,19 @@ public class PlayerInput : MonoBehaviour
 
 		}
 	}
+    private void GetPauseInput()
+    {
+        if (Input.GetKeyDown(KeyCode.E)) 
+        {
+            OnPause?.Invoke();
+        }
+    }
+
+    private void GetInventoryInput()
+    {
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            OnInventoryToggle?.Invoke();
+        }
+    }
 }

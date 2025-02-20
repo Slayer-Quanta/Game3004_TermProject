@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -7,6 +5,7 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField]
 	private CharacterController controller;
 
+	[Space]
 	[SerializeField]
 	private float playerSpeed = 5.0f, playerRunSpeed = 8;
 	[SerializeField]
@@ -76,7 +75,7 @@ public class PlayerMovement : MonoBehaviour
 	{
 		//playerVelocity.y = Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
 		playerVelocity.y = jumpHeight;
-	}
+    }
 
 	private void ApplyGravityForce()
 	{
@@ -84,7 +83,7 @@ public class PlayerMovement : MonoBehaviour
 		playerVelocity.y = Mathf.Clamp(playerVelocity.y, gravityValue, 10);
 	}
 
-	private void Update()
+	private void FixedUpdate()
 	{
 		IsGrounded = Physics.Raycast(transform.position, Vector3.down, rayDistance, groundMask);
 	}

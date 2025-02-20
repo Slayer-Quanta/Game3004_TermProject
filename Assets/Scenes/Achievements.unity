@@ -233,8 +233,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.16520834}
   m_AnchorMax: {x: 0.5, y: 0.16520834}
-  m_AnchoredPosition: {x: 0.00053596, y: 0}
-  m_SizeDelta: {x: 100.7995, y: 86.3814}
+  m_AnchoredPosition: {x: -3.1014, y: 0}
+  m_SizeDelta: {x: 197.6557, y: 86.3814}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &366029888
 MonoBehaviour:
@@ -305,14 +305,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.04356533, g: 0.62686336, b: 0.8396226, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -803633251108792907, guid: 91a1065472135444d81e0efc600e3bce, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3cbf5277da34ced4b84931ee31889b56, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -330,6 +330,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 366029886}
   m_CullTransparentMesh: 1
+--- !u!1001 &576574238
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 362.36246
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 248.17923
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.223755
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 248158200592595654, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4087526416867546613, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
+      propertyPath: m_Name
+      value: Audio Manager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ea21d8d824d95814eab602f92a2e105f, type: 3}
 --- !u!1 &1345784548
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,8 +550,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Achievements
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 11ba41d3a7c44214b89a5348f7ff6581, type: 2}
-  m_sharedMaterial: {fileID: 6174279902499185738, guid: 11ba41d3a7c44214b89a5348f7ff6581, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1a15ebb284c66274a8b4cf80bbb34228, type: 2}
+  m_sharedMaterial: {fileID: -410891250146374029, guid: 1a15ebb284c66274a8b4cf80bbb34228, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -518,7 +575,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 69.15
+  m_fontSize: 44
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -804,3 +861,4 @@ SceneRoots:
   - {fileID: 1610000615}
   - {fileID: 1345784552}
   - {fileID: 236790740}
+  - {fileID: 576574238}

@@ -1,27 +1,16 @@
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Test : MonoBehaviour
 {
-    public Slider musicVolumeSlider;
+    public Transform player;
+    public Transform enemy;
 
-    private void Start()
-    {
-        SoundManager.self.PlayMenuMusic();
-        
-        musicVolumeSlider.value = PlayerPrefs.GetFloat("MusicVolume", 1);
-        SliderValueChange(musicVolumeSlider.value);
-    }
+    public float dir;
 
-    public void SliderValueChange(float value)
+    
+    public void Update()
     {
-        SoundManager.self.ChangeVolume(value);
-    }
-
-    public void Btn_Play()
-    {
-        SoundManager.self.PlayGamePlayMusic();
+        dir = Vector3.SignedAngle(enemy.forward, player.position, Vector3.up);
     }
 }
