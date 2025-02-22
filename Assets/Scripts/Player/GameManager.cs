@@ -2,6 +2,8 @@ using Unity.Cinemachine;
 using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
+using Helper.Waiter;
 
 public class GameManager : MonoBehaviour
 {
@@ -9,7 +11,10 @@ public class GameManager : MonoBehaviour
     public Vector3Int currentPlayerChunkPosition;
 	private Vector3Int currentChunkCenter = Vector3Int.zero;
 
-	public World world;
+	[SerializeField] NavMeshSurface navMeshSurface;
+
+	public DayNightCycleManager dayNightCycleManager;
+    public World world;
 
 	public float detectionTime = 1;
 	public CinemachineCamera camera_VM;
@@ -22,6 +27,11 @@ public class GameManager : MonoBehaviour
 	public Vector2 enemySpawnRangeX = new Vector2(-100, 100);
 	public Vector2 enemySpawnRangeY = new Vector2(-100, 100);
     List<Enemy> enemies = new List<Enemy>();
+
+    private void OnDestroy()
+    {
+        dayNightCycleManager.OnLightStateChange.RemoveAllListeners();
+    }
 
     public void SpawnPlayer()
 	{
@@ -37,15 +47,43 @@ public class GameManager : MonoBehaviour
 			cameraBrain.enabled = true;
 			StartCheckingTheMap();
 
-            SpawnEnemies();
+            // Build the navmesh
+            navMeshSurface.BuildNavMesh();
+
+			Waiter.Wait(5f, () =>
+			{
+				if (dayNightCycleManager.activateLights)
+				{
+					SpawnEnemies();
+				}
+				else
+				{
+					dayNightCycleManager.OnLightStateChange.RemoveAllListeners();
+					dayNightCycleManager.OnLightStateChange.AddListener((isLightOn) =>
+					{
+						if (isLightOn)
+						{
+							SpawnEnemies();
+						}
+					});
+				}
+			});
         }
 	}
+
+
 
     void SpawnEnemies()
     {
         for (int i = 0; i < enemyCount; i++)
         {
             Vector3 spawnPosition = new Vector3(Random.Range(enemySpawnRangeX.x, enemySpawnRangeX.y), 100, Random.Range(enemySpawnRangeY.x, enemySpawnRangeY.y));
+
+            if (Physics.Raycast(spawnPosition, Vector3.down, out RaycastHit hit, 120))
+            {
+                spawnPosition = hit.point + (Vector3.up * 2);
+            }
+
             Enemy enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
             enemy.Init(player.transform);
             enemies.Add(enemy);

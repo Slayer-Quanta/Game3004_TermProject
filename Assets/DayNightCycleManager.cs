@@ -1,8 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.Rendering;
+using UnityEngine.Events;
 
 public class DayNightCycleManager: MonoBehaviour
 {
@@ -19,6 +18,8 @@ public class DayNightCycleManager: MonoBehaviour
     public bool activateLights; // checks if lights are on
     public GameObject[] lights; // all the lights we want on when its dark
     public SpriteRenderer[] stars; // star sprites 
+
+    public UnityEvent<bool> OnLightStateChange; // event for when lights are turned on or off
 
     void Start()
     {
@@ -77,6 +78,7 @@ public class DayNightCycleManager: MonoBehaviour
                         lights[i].SetActive(true); // turn them all on
                     }
                     activateLights = true;
+                    OnLightStateChange.Invoke(true); // invoke the event
                 }
             }
         }
@@ -98,6 +100,7 @@ public class DayNightCycleManager: MonoBehaviour
                         lights[i].SetActive(false); // shut them off
                     }
                     activateLights = false;
+                    OnLightStateChange.Invoke(false); // invoke the event
                 }
             }
         }
