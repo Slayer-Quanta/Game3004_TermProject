@@ -4,8 +4,22 @@ using UnityEngine.UI;
 
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    public Item item;
+
+    [Header("UI")]
     public Image image;
+    
     [HideInInspector] public Transform parentAfterDrag;
+
+    private void Start()
+    {
+        InitialiseItem(item);
+    }
+
+    public void InitialiseItem(Item newItem)
+    {
+        image.sprite = newItem.image;
+    }
     public void OnBeginDrag(PointerEventData eventData)
     {
         Debug.Log("Begin drag");
