@@ -272,7 +272,7 @@ MonoBehaviour:
   playerPrefab: {fileID: 116692708104115924, guid: d43e9bef6cf8dc74dbbc13269406cc57, type: 3}
   currentPlayerChunkPosition: {x: 0, y: 0, z: 0}
   navMeshSurface: {fileID: 8619955}
-  dayNightCycleManager: {fileID: 1020436692}
+  dayNightCycleManager: {fileID: 0}
   world: {fileID: 1774663341}
   detectionTime: 1
   camera_VM: {fileID: 742801425}
@@ -966,7 +966,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -263.31537, y: -227.31413}
+  m_AnchoredPosition: {x: -263.31537, y: -285}
   m_SizeDelta: {x: 473, y: 60}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &234270867
@@ -3903,20 +3903,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 56f05310c1e024c47808dce0fac61265, type: 3}
-  timeDisplay: {fileID: 173155076}
-  dayDisplay: {fileID: 178931200}
-  ppv: {fileID: 1020436690}
-  tick: 100000
-  seconds: 0
-  mins: 0
-  hours: 0
-  days: 1
-  activateLights: 0
-  lights: []
-  stars: []
-  OnLightStateChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1189988391
 GameObject:
   m_ObjectHideFlags: 0
@@ -4542,6 +4528,9 @@ MonoBehaviour:
   activateLights: 0
   lights: []
   stars: []
+  OnLightStateChange:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &1299524448
 MonoBehaviour:
   m_ObjectHideFlags: 0
