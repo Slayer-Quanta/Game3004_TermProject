@@ -96,30 +96,84 @@ public class Character : MonoBehaviour
 	}
 
     private void HandleMouseClick()
+{
+    AudioManager.instance.PlayButtonClick(); 
+
+    Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
+    RaycastHit hit;
+
+    if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
     {
-        AudioManager.instance.PlayButtonClick(); 
+        Vector3Int clickedBlockPos = new Vector3Int(
+            Mathf.RoundToInt(hit.point.x),
+            Mathf.RoundToInt(hit.point.y),
+            Mathf.RoundToInt(hit.point.z)
+        );
 
-        Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
-        RaycastHit hit;
-
-        if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
+        if (Input.GetMouseButton(0)) // Left-click: Destroy block
         {
-            Vector3Int clickedBlockPos = new Vector3Int(Mathf.RoundToInt(hit.point.x), Mathf.RoundToInt(hit.point.y), Mathf.RoundToInt(hit.point.z));
-
-            // Check if the clicked block is the same as the last one
             if (clickedBlockPos == lastClickedBlockPos && Time.time - lastClickTime <= doubleClickThreshold)
             {
-                // Double-clicked, destroy the block
                 ModifyTerrain(hit);
             }
             else
             {
-                // First click, record the time and block position
                 lastClickedBlockPos = clickedBlockPos;
                 lastClickTime = Time.time;
             }
         }
+            else if (Input.GetMouseButton(1)) // Right-click: Place block
+            {
+                // Get the block type at the clicked position
+                BlockType lookedAtBlockType = GetLookedAtBlockType(hit);
+
+                BlockType blockToPlace;
+                switch (lookedAtBlockType)
+                {
+                    case BlockType.Grass_Dirt:
+                        blockToPlace = BlockType.Dirt;
+                        break;
+                    case BlockType.Dirt:
+                        blockToPlace = BlockType.Stone;
+                        break;
+                    case BlockType.Stone:
+                        blockToPlace = BlockType.TreeTrunk;
+                        break;
+                    case BlockType.TreeTrunk:
+                        blockToPlace = BlockType.Grass_Dirt;
+                        break;
+                    default:
+                        blockToPlace = BlockType.Grass_Dirt;
+                        break;
+                }
+
+                // Calculate the exact position of the clicked block
+                Vector3Int targetBlockPos = new Vector3Int(
+       Mathf.FloorToInt(hit.point.x - hit.normal.x * 0.5f),
+       Mathf.FloorToInt(hit.point.y - hit.normal.y * 0.5f),
+       Mathf.FloorToInt(hit.point.z - hit.normal.z * 0.5f)
+   );
+
+                // Calculate the position to place the new block 
+                Vector3Int placeBlockPos = targetBlockPos + Vector3Int.RoundToInt(hit.normal);
+
+
+                // Check if the placeBlockPos is empty before placing the new block
+                BlockType existingBlock = world.GetBlockFromChunkCoordinates(
+                    hit.collider.GetComponent<ChunkRenderer>().ChunkData,
+                    placeBlockPos.x, placeBlockPos.y, placeBlockPos.z
+                );
+
+                if (existingBlock == BlockType.Air || existingBlock == BlockType.Nothing)
+                {
+                    world.SetBlock(placeBlockPos, blockToPlace);
+                }
+            } 
+
+        
     }
+}
+
     private void ToggleInventory()
     {
         AudioManager.instance.PlaySFX("Inventory Toggle");
@@ -129,4 +183,19 @@ public class Character : MonoBehaviour
 	{
 		world.SetBlock(hit, BlockType.Air);
 	}
+    private BlockType GetLookedAtBlockType(RaycastHit hit)
+    {
+        Vector3Int blockPos = new Vector3Int(
+            Mathf.RoundToInt(hit.point.x - hit.normal.x / 2),
+            Mathf.RoundToInt(hit.point.y - hit.normal.y / 2),
+            Mathf.RoundToInt(hit.point.z - hit.normal.z / 2)
+        );
+
+        // Get the block type at the clicked position
+        return world.GetBlockFromChunkCoordinates(
+            hit.collider.GetComponent<ChunkRenderer>().ChunkData,
+            blockPos.x, blockPos.y, blockPos.z
+        );
+    }
+
 }

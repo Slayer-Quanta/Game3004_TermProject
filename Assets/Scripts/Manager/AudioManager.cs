@@ -23,7 +23,7 @@ public class AudioManager : MonoBehaviour
     private void Start()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
-        PlayMusic("Menu Background Music");  // Default music for MainMenu scene
+        PlayMusic("Menu Background Music"); 
     }
 
     private void OnDestroy()
@@ -33,10 +33,9 @@ public class AudioManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log("Loaded Scene: " + scene.name); // This will print the name of the loaded scene
+        Debug.Log("Loaded Scene: " + scene.name); 
         musicSource.Stop();
 
-        // Switch case to handle different scenes and play respective music
         switch (scene.name)
         {
             case "MainMenu":

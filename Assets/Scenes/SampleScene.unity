@@ -272,7 +272,7 @@ MonoBehaviour:
   playerPrefab: {fileID: 116692708104115924, guid: d43e9bef6cf8dc74dbbc13269406cc57, type: 3}
   currentPlayerChunkPosition: {x: 0, y: 0, z: 0}
   navMeshSurface: {fileID: 8619955}
-  dayNightCycleManager: {fileID: 0}
+  dayNightCycleManager: {fileID: 1299524450}
   world: {fileID: 1774663341}
   detectionTime: 1
   camera_VM: {fileID: 742801425}
@@ -966,7 +966,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -263.31537, y: -285}
+  m_AnchoredPosition: {x: -263.31537, y: -227.31413}
   m_SizeDelta: {x: 473, y: 60}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &234270867
@@ -4497,7 +4497,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1299524449}
   - component: {fileID: 1299524448}
-  - component: {fileID: 1299524447}
+  - component: {fileID: 1299524450}
   m_Layer: 0
   m_Name: Global Volume
   m_TagString: Untagged
@@ -4505,32 +4505,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1299524447
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1299524446}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2556bff1160a74c4680de576a3f92671, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  timeDisplay: {fileID: 501307144}
-  dayDisplay: {fileID: 1583305504}
-  ppv: {fileID: 1299524448}
-  tick: 100000
-  seconds: 0
-  mins: 0
-  hours: 0
-  days: 1
-  activateLights: 0
-  lights: []
-  stars: []
-  OnLightStateChange:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &1299524448
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4563,6 +4537,32 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1299524450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1299524446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2556bff1160a74c4680de576a3f92671, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeDisplay: {fileID: 501307144}
+  dayDisplay: {fileID: 1583305504}
+  ppv: {fileID: 1299524448}
+  tick: 1000000
+  seconds: 0
+  mins: 0
+  hours: 0
+  days: 1
+  activateLights: 0
+  lights: []
+  stars: []
+  OnLightStateChange:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1336708010
 GameObject:
   m_ObjectHideFlags: 0
