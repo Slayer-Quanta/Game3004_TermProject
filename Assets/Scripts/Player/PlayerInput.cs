@@ -55,14 +55,18 @@ public class PlayerInput : MonoBehaviour
 		MousePosition = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
 	}
 
-	private void GetMouseClick()
-	{
-		if (Input.GetMouseButtonDown(0))
-		{
-			OnMouseClick?.Invoke();
+    private void GetMouseClick()
+    {
+        if (Input.GetMouseButtonDown(0)) // Left-click
+        {
+            OnMouseClick?.Invoke();
+        }
+        else if (Input.GetMouseButtonDown(1)) // Right-click
+        {
+            OnMouseClick?.Invoke();
+        }
+    }
 
-		}
-	}
     private void GetPauseInput()
     {
         if (Input.GetKeyDown(KeyCode.E)) 
