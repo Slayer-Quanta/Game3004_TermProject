@@ -261,7 +261,6 @@ MonoBehaviour:
     m_Bits: 8
   fly: 0
   animator: {fileID: 116692707738079568}
-  world: {fileID: 0}
 --- !u!1001 &116692707728663600
 PrefabInstance:
   m_ObjectHideFlags: 0

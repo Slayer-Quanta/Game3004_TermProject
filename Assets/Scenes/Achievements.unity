@@ -550,8 +550,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Achievements
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 88b0b858f2df58648a0b6492dd942492, type: 2}
-  m_sharedMaterial: {fileID: 7637791706649562948, guid: 88b0b858f2df58648a0b6492dd942492, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1a15ebb284c66274a8b4cf80bbb34228, type: 2}
+  m_sharedMaterial: {fileID: -410891250146374029, guid: 1a15ebb284c66274a8b4cf80bbb34228, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

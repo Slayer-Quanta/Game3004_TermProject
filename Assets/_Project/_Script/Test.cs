@@ -1,27 +1,22 @@
+using Helper.Waiter;
+using Unity.AI.Navigation;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+
 
 public class Test : MonoBehaviour
 {
-    public Slider musicVolumeSlider;
+    public Transform player;
+    public Enemy enemy;
+    public NavMeshSurface navMeshSurface;
 
-    private void Start()
+    [ButtonLUFI]
+    void T()
     {
-        SoundManager.self.PlayMenuMusic();
-        
-        musicVolumeSlider.value = PlayerPrefs.GetFloat("MusicVolume", 1);
-        SliderValueChange(musicVolumeSlider.value);
-    }
+        navMeshSurface.BuildNavMesh();
 
-    public void SliderValueChange(float value)
-    {
-        SoundManager.self.ChangeVolume(value);
-    }
-
-    public void Btn_Play()
-    {
-        SoundManager.self.PlayGamePlayMusic();
+        Waiter.WaitEndOffFrame(1, () =>
+        {
+            enemy.Init(player);
+        });
     }
 }

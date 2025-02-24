@@ -4,28 +4,21 @@ using UnityEngine;
 
 public class Character : MonoBehaviour
 {
-	[SerializeField]
-	private Camera mainCamera;
-	[SerializeField]
-	private PlayerInput playerInput;
-	[SerializeField]
-	private PlayerMovement playerMovement;
+	[SerializeField] private Camera mainCamera;
+	[SerializeField] private PlayerInput playerInput;
+	[SerializeField] private PlayerMovement playerMovement;
 
-    [SerializeField] 
-	private PauseSystem pauseMenu;
-
+    [SerializeField] private PauseSystem pauseMenu;
     public float interactionRayLength = 5;
-
-	public LayerMask groundMask;
-
-
+    public LayerMask groundMask;
 	public bool fly = false;
-
 	public Animator animator;
-
 	bool isWaiting = false;
-
 	public World world;
+
+	private float lastClickTime = 0f;
+	private float doubleClickThreshold = 0.5f; // Time window for double-click in seconds
+	private Vector3Int lastClickedBlockPos = Vector3Int.zero;
 
 	private void Awake()
 	{
@@ -43,65 +36,166 @@ public class Character : MonoBehaviour
 
         pauseMenu = FindObjectOfType<PauseSystem>();
         playerInput.OnPause += pauseMenu.TogglePause;
+        playerInput.OnInventoryToggle += ToggleInventory;
     }
 
-	private void HandleFlyClick()
+    private void OnDestroy()
+    {
+        playerInput.OnMouseClick -= HandleMouseClick;
+        playerInput.OnFly -= HandleFlyClick;
+        playerInput.OnPause -= PauseSystem.self.TogglePause;
+        playerInput.OnInventoryToggle -= ToggleInventory;
+    }
+
+    private void HandleFlyClick()
 	{
 		fly = !fly;
 	}
 
-	void Update()
-	{
-		if (fly)
-		{
-			animator.SetFloat("speed", 0);
-			animator.SetBool("isGrounded", false);
-			animator.ResetTrigger("jump");
-			playerMovement.Fly(playerInput.MovementInput, playerInput.IsJumping, playerInput.RunningPressed);
+    void Update()
+    {
+        if (fly)
+        {
+            animator.SetFloat("speed", 0);
+            animator.SetBool("isGrounded", false);
+            animator.ResetTrigger("jump");
+            playerMovement.Fly(playerInput.MovementInput, playerInput.IsJumping, playerInput.RunningPressed);
+        }
+        else
+        {
+            animator.SetBool("isGrounded", playerMovement.IsGrounded);
 
-		}
-		else
-		{
-			animator.SetBool("isGrounded", playerMovement.IsGrounded);
-			if (playerMovement.IsGrounded && playerInput.IsJumping && isWaiting == false)
-			{
-				animator.SetTrigger("jump");
-				isWaiting = true;
-				StopAllCoroutines();
-				StartCoroutine(ResetWaiting());
-			}
-			animator.SetFloat("speed", playerInput.MovementInput.magnitude);
-			playerMovement.HandleGravity(playerInput.IsJumping);
-			playerMovement.Walk(playerInput.MovementInput, playerInput.RunningPressed);
+            if (playerMovement.IsGrounded && playerInput.IsJumping && isWaiting == false)
+            {
+                animator.SetTrigger("jump");
+                AudioManager.instance.PlayJumpSound(); 
+                isWaiting = true;
+                StopAllCoroutines();
+                StartCoroutine(ResetWaiting());
+            }
+
+            animator.SetFloat("speed", playerInput.MovementInput.magnitude);
+
+            if (playerMovement.IsGrounded && playerInput.MovementInput.magnitude > 0)
+            {
+                if (!AudioManager.instance.sfxSource.isPlaying) 
+                    AudioManager.instance.PlayWalkSound();
+            }
+
+            playerMovement.HandleGravity(playerInput.IsJumping);
+            playerMovement.Walk(playerInput.MovementInput, playerInput.RunningPressed);
+        }
+    }
 
 
-		}
-
-	}
-	IEnumerator ResetWaiting()
+    IEnumerator ResetWaiting()
 	{
 		yield return new WaitForSeconds(0.1f);
 		animator.ResetTrigger("jump");
 		isWaiting = false;
 	}
 
-	private void HandleMouseClick()
-	{
-		Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
-		RaycastHit hit;
-		if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
-		{
-			ModifyTerrain(hit);
-		}
+    private void HandleMouseClick()
+{
+    AudioManager.instance.PlayButtonClick(); 
 
-	}
+    Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
+    RaycastHit hit;
 
-	private void ModifyTerrain(RaycastHit hit)
+    if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
+    {
+        Vector3Int clickedBlockPos = new Vector3Int(
+            Mathf.RoundToInt(hit.point.x),
+            Mathf.RoundToInt(hit.point.y),
+            Mathf.RoundToInt(hit.point.z)
+        );
+
+        if (Input.GetMouseButton(0)) // Left-click: Destroy block
+        {
+            if (clickedBlockPos == lastClickedBlockPos && Time.time - lastClickTime <= doubleClickThreshold)
+            {
+                ModifyTerrain(hit);
+            }
+            else
+            {
+                lastClickedBlockPos = clickedBlockPos;
+                lastClickTime = Time.time;
+            }
+        }
+            else if (Input.GetMouseButton(1)) // Right-click: Place block
+            {
+                // Get the block type at the clicked position
+                BlockType lookedAtBlockType = GetLookedAtBlockType(hit);
+
+                BlockType blockToPlace;
+                switch (lookedAtBlockType)
+                {
+                    case BlockType.Grass_Dirt:
+                        blockToPlace = BlockType.Dirt;
+                        break;
+                    case BlockType.Dirt:
+                        blockToPlace = BlockType.Stone;
+                        break;
+                    case BlockType.Stone:
+                        blockToPlace = BlockType.TreeTrunk;
+                        break;
+                    case BlockType.TreeTrunk:
+                        blockToPlace = BlockType.Grass_Dirt;
+                        break;
+                    default:
+                        blockToPlace = BlockType.Grass_Dirt;
+                        break;
+                }
+
+                // Calculate the exact position of the clicked block
+                Vector3Int targetBlockPos = new Vector3Int(
+       Mathf.FloorToInt(hit.point.x - hit.normal.x * 0.5f),
+       Mathf.FloorToInt(hit.point.y - hit.normal.y * 0.5f),
+       Mathf.FloorToInt(hit.point.z - hit.normal.z * 0.5f)
+   );
+
+                // Calculate the position to place the new block 
+                Vector3Int placeBlockPos = targetBlockPos + Vector3Int.RoundToInt(hit.normal);
+
+
+                // Check if the placeBlockPos is empty before placing the new block
+                BlockType existingBlock = world.GetBlockFromChunkCoordinates(
+                    hit.collider.GetComponent<ChunkRenderer>().ChunkData,
+                    placeBlockPos.x, placeBlockPos.y, placeBlockPos.z
+                );
+
+                if (existingBlock == BlockType.Air || existingBlock == BlockType.Nothing)
+                {
+                    world.SetBlock(placeBlockPos, blockToPlace);
+                }
+            } 
+
+        
+    }
+}
+
+    private void ToggleInventory()
+    {
+        AudioManager.instance.PlaySFX("Inventory Toggle");
+    }
+
+    private void ModifyTerrain(RaycastHit hit)
 	{
 		world.SetBlock(hit, BlockType.Air);
 	}
+    private BlockType GetLookedAtBlockType(RaycastHit hit)
+    {
+        Vector3Int blockPos = new Vector3Int(
+            Mathf.RoundToInt(hit.point.x - hit.normal.x / 2),
+            Mathf.RoundToInt(hit.point.y - hit.normal.y / 2),
+            Mathf.RoundToInt(hit.point.z - hit.normal.z / 2)
+        );
 
-
-
+        // Get the block type at the clicked position
+        return world.GetBlockFromChunkCoordinates(
+            hit.collider.GetComponent<ChunkRenderer>().ChunkData,
+            blockPos.x, blockPos.y, blockPos.z
+        );
+    }
 
 }

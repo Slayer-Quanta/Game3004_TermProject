@@ -1,19 +1,37 @@
 using Unity.Cinemachine;
 using System.Collections;
 using UnityEngine;
+using System.Collections.Generic;
+using Unity.AI.Navigation;
+using Helper.Waiter;
 
 public class GameManager : MonoBehaviour
 {
 	public GameObject playerPrefab;
-	private GameObject player;
-	public Vector3Int currentPlayerChunkPosition;
+    public Vector3Int currentPlayerChunkPosition;
 	private Vector3Int currentChunkCenter = Vector3Int.zero;
 
-	public World world;
+	[SerializeField] NavMeshSurface navMeshSurface;
+
+	public DayNightCycleManager dayNightCycleManager;
+    public World world;
 
 	public float detectionTime = 1;
 	public CinemachineCamera camera_VM;
 	public CinemachineBrain cameraBrain;
+	public GameObject player { get; private set; }
+
+	[Header("Enemy")]
+	public Enemy enemyPrefab;
+	public int enemyCount = 10;
+	public Vector2 enemySpawnRangeX = new Vector2(-100, 100);
+	public Vector2 enemySpawnRangeY = new Vector2(-100, 100);
+    List<Enemy> enemies = new List<Enemy>();
+
+    private void OnDestroy()
+    {
+        dayNightCycleManager.OnLightStateChange.RemoveAllListeners();
+    }
 
     public void SpawnPlayer()
 	{
@@ -28,10 +46,51 @@ public class GameManager : MonoBehaviour
 			camera_VM.Follow = player.transform.GetChild(0);
 			cameraBrain.enabled = true;
 			StartCheckingTheMap();
-		}
+
+            // Build the navmesh
+            navMeshSurface.BuildNavMesh();
+
+			Waiter.Wait(5f, () =>
+			{
+				if (dayNightCycleManager.activateLights)
+				{
+					SpawnEnemies();
+				}
+				else
+				{
+					dayNightCycleManager.OnLightStateChange.RemoveAllListeners();
+					dayNightCycleManager.OnLightStateChange.AddListener((isLightOn) =>
+					{
+						if (isLightOn)
+						{
+							SpawnEnemies();
+						}
+					});
+				}
+			});
+        }
 	}
 
-	public void StartCheckingTheMap()
+
+
+    void SpawnEnemies()
+    {
+        for (int i = 0; i < enemyCount; i++)
+        {
+            Vector3 spawnPosition = new Vector3(Random.Range(enemySpawnRangeX.x, enemySpawnRangeX.y), 100, Random.Range(enemySpawnRangeY.x, enemySpawnRangeY.y));
+
+            if (Physics.Raycast(spawnPosition, Vector3.down, out RaycastHit hit, 120))
+            {
+                spawnPosition = hit.point + (Vector3.up * 2);
+            }
+
+            Enemy enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+            enemy.Init(player.transform);
+            enemies.Add(enemy);
+        }
+    }
+
+    public void StartCheckingTheMap()
 	{
 		SetCurrentChunkCoordinates();
 		StopAllCoroutines();
