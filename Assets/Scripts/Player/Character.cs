@@ -20,6 +20,9 @@ public class Character : MonoBehaviour
 	private float doubleClickThreshold = 0.5f; // Time window for double-click in seconds
 	private Vector3Int lastClickedBlockPos = Vector3Int.zero;
 
+
+	[SerializeField] private GameObject explosionPrefab; // Explosion effect prefab
+
 	private void Awake()
 	{
 		if (mainCamera == null)
@@ -95,94 +98,67 @@ public class Character : MonoBehaviour
 		isWaiting = false;
 	}
 
-    private void HandleMouseClick()
-{
-    AudioManager.instance.PlayButtonClick(); 
+	private void HandleMouseClick()
+	{
+		Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
+		RaycastHit hit;
 
-    Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
-    RaycastHit hit;
+		if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
+		{
+			Vector3Int clickedBlockPos = new Vector3Int(
+				Mathf.RoundToInt(hit.point.x),
+				Mathf.RoundToInt(hit.point.y),
+				Mathf.RoundToInt(hit.point.z)
+			);
 
-    if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
-    {
-        Vector3Int clickedBlockPos = new Vector3Int(
-            Mathf.RoundToInt(hit.point.x),
-            Mathf.RoundToInt(hit.point.y),
-            Mathf.RoundToInt(hit.point.z)
-        );
+			// Check if the clicked block is the same as the last one
+			if (clickedBlockPos == lastClickedBlockPos && Time.time - lastClickTime <= doubleClickThreshold)
+			{
+				// Double-clicked, destroy the block and play explosion
+				ModifyTerrain(hit);
+			}
+			else
+			{
+				// First click, record the time and block position
+				lastClickedBlockPos = clickedBlockPos;
+				lastClickTime = Time.time;
+			}
+		}
+	}
 
-        if (Input.GetMouseButton(0)) // Left-click: Destroy block
-        {
-            if (clickedBlockPos == lastClickedBlockPos && Time.time - lastClickTime <= doubleClickThreshold)
-            {
-                ModifyTerrain(hit);
-            }
-            else
-            {
-                lastClickedBlockPos = clickedBlockPos;
-                lastClickTime = Time.time;
-            }
-        }
-            else if (Input.GetMouseButton(1)) // Right-click: Place block
-            {
-                // Get the block type at the clicked position
-                BlockType lookedAtBlockType = GetLookedAtBlockType(hit);
+	private void ModifyTerrain(RaycastHit hit)
+	{
+		// Play explosion effect at the block's position
+		PlayExplosion(hit.point);
 
-                BlockType blockToPlace;
-                switch (lookedAtBlockType)
-                {
-                    case BlockType.Grass_Dirt:
-                        blockToPlace = BlockType.Dirt;
-                        break;
-                    case BlockType.Dirt:
-                        blockToPlace = BlockType.Stone;
-                        break;
-                    case BlockType.Stone:
-                        blockToPlace = BlockType.TreeTrunk;
-                        break;
-                    case BlockType.TreeTrunk:
-                        blockToPlace = BlockType.Grass_Dirt;
-                        break;
-                    default:
-                        blockToPlace = BlockType.Grass_Dirt;
-                        break;
-                }
+		// Destroy the block
+		world.SetBlock(hit, BlockType.Air);
+	}
 
-                // Calculate the exact position of the clicked block
-                Vector3Int targetBlockPos = new Vector3Int(
-       Mathf.FloorToInt(hit.point.x - hit.normal.x * 0.5f),
-       Mathf.FloorToInt(hit.point.y - hit.normal.y * 0.5f),
-       Mathf.FloorToInt(hit.point.z - hit.normal.z * 0.5f)
-   );
+	private void PlayExplosion(Vector3 position)
+	{
+		if (explosionPrefab != null)
+		{
+			// Instantiate explosion effect at the block’s position
+			GameObject explosion = Instantiate(explosionPrefab, position, Quaternion.identity);
 
-                // Calculate the position to place the new block 
-                Vector3Int placeBlockPos = targetBlockPos + Vector3Int.RoundToInt(hit.normal);
+			// Get the Particle System from the explosion prefab
+			ParticleSystem particles = explosion.GetComponent<ParticleSystem>();
 
+			// Play the particle system
+			particles.Play();
 
-                // Check if the placeBlockPos is empty before placing the new block
-                BlockType existingBlock = world.GetBlockFromChunkCoordinates(
-                    hit.collider.GetComponent<ChunkRenderer>().ChunkData,
-                    placeBlockPos.x, placeBlockPos.y, placeBlockPos.z
-                );
+			// Destroy explosion effect after it finishes playing
+			Destroy(explosion, particles.main.duration);
+		}
+	}
 
-                if (existingBlock == BlockType.Air || existingBlock == BlockType.Nothing)
-                {
-                    world.SetBlock(placeBlockPos, blockToPlace);
-                }
-            } 
-
-        
-    }
-}
-
-    private void ToggleInventory()
+	private void ToggleInventory()
     {
         AudioManager.instance.PlaySFX("Inventory Toggle");
     }
 
-    private void ModifyTerrain(RaycastHit hit)
-	{
-		world.SetBlock(hit, BlockType.Air);
-	}
+   
     private BlockType GetLookedAtBlockType(RaycastHit hit)
     {
         Vector3Int blockPos = new Vector3Int(
