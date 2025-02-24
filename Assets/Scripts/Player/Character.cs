@@ -15,6 +15,8 @@ public class Character : MonoBehaviour
 	bool isWaiting = false;
 	public World world;
 
+	[SerializeField] private GameObject explosionPrefab; // Explosion effect prefab
+
 	private float lastClickTime = 0f;
 	private float doubleClickThreshold = 0.5f; // Time window for double-click in seconds
 	private Vector3Int lastClickedBlockPos = Vector3Int.zero;
@@ -78,12 +80,16 @@ public class Character : MonoBehaviour
 
 		if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
 		{
-			Vector3Int clickedBlockPos = new Vector3Int(Mathf.RoundToInt(hit.point.x), Mathf.RoundToInt(hit.point.y), Mathf.RoundToInt(hit.point.z));
+			Vector3Int clickedBlockPos = new Vector3Int(
+				Mathf.RoundToInt(hit.point.x),
+				Mathf.RoundToInt(hit.point.y),
+				Mathf.RoundToInt(hit.point.z)
+			);
 
 			// Check if the clicked block is the same as the last one
 			if (clickedBlockPos == lastClickedBlockPos && Time.time - lastClickTime <= doubleClickThreshold)
 			{
-				// Double-clicked, destroy the block
+				// Double-clicked, destroy the block and play explosion
 				ModifyTerrain(hit);
 			}
 			else
@@ -97,6 +103,28 @@ public class Character : MonoBehaviour
 
 	private void ModifyTerrain(RaycastHit hit)
 	{
+		// Play explosion effect at the block's position
+		PlayExplosion(hit.point);
+
+		// Destroy the block
 		world.SetBlock(hit, BlockType.Air);
+	}
+
+	private void PlayExplosion(Vector3 position)
+	{
+		if (explosionPrefab != null)
+		{
+			// Instantiate explosion effect at the block’s position
+			GameObject explosion = Instantiate(explosionPrefab, position, Quaternion.identity);
+
+			// Get the Particle System from the explosion prefab
+			ParticleSystem particles = explosion.GetComponent<ParticleSystem>();
+
+			// Play the particle system
+			particles.Play();
+
+			// Destroy explosion effect after it finishes playing
+			Destroy(explosion, particles.main.duration);
+		}
 	}
 }
