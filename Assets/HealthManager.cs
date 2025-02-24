@@ -3,13 +3,13 @@ using UnityEngine.UI;
 
 public class HealthManager : MonoBehaviour
 {
-    public Image healthBar;  // Assign this in the Inspector
+    public Image healthBar;  
     public float healthAmount = 100f;
 
     void Update()
     {
         // Press Enter to take damage
-        if (Input.GetKeyDown(KeyCode.Return))
+        if (Input.GetKeyDown(KeyCode.R))
         {
             TakeDamage(20);
         }

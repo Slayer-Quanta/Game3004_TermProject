@@ -10,6 +10,8 @@ using UnityEngine.Events;
 
 public class World : MonoBehaviour
 {
+	public static World self;
+
 	public int mapSizeInChunks = 6;
 	public int chunkSize = 16, chunkHeight = 100;
 	public int chunkDrawingRange = 8;
@@ -33,6 +35,8 @@ public class World : MonoBehaviour
 
 	private void Awake()
 	{
+		self = this;
+
 		worldData = new WorldData
 		{
 			chunkHeight = this.chunkHeight,
@@ -229,9 +233,33 @@ public class World : MonoBehaviour
 
 		return (float)pos;
 	}
+    internal bool SetBlock(Vector3Int position, BlockType blockType)
+    {
+        // Get the chunk at the given position
+        Vector3Int chunkCoord = Chunk.ChunkPositionFromBlockCoords(this, position.x, position.y, position.z);
+
+        // Check if the chunk exists
+        if (worldData.chunkDataDictionary.TryGetValue(chunkCoord, out ChunkData chunkData))
+        {
+            // Set the block at the calculated position
+            WorldDataHelper.SetBlock(chunkData.worldReference, position, blockType);
+
+            // Mark chunk as modified and update it
+            ChunkRenderer chunkRenderer = WorldDataHelper.GetChunk(chunkData.worldReference, chunkData.worldPosition);
+            if (chunkRenderer != null)
+            {
+                chunkRenderer.ModifiedByThePlayer = true;
+                chunkRenderer.UpdateChunk();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
 
 
-	private WorldGenerationData GetPositionsThatPlayerSees(Vector3Int playerPosition)
+    private WorldGenerationData GetPositionsThatPlayerSees(Vector3Int playerPosition)
 	{
 		List<Vector3Int> allChunkPositionsNeeded = WorldDataHelper.GetChunkPositionsAroundPlayer(this, playerPosition);
 
