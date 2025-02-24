@@ -73,4 +73,10 @@ public class MainMenu : MonoBehaviour
         settingsPanel.SetActive(false);
         optionsPanel.SetActive(true);
     }
+
+    public void KeyboardOptions()
+    {
+        AudioManager.instance.PlayButtonClick();
+        SceneManager.LoadSceneAsync(5); 
+    }
 }
