@@ -224,7 +224,6 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                 {
                     if (!action.bindings[i].isPartOfComposite)
                         break;
-
                     action.RemoveBindingOverride(i);
                 }
             }
@@ -239,29 +238,39 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
         }
 
         //================================================================================
-        // 2) ResetAllToDefault() -> Resets ALL bindings in the action map to defaults.
+        // 2) Global Reset: ResetAllBindings() -> Resets ALL bindings from all RebindActionUI components.
+        //    Call this from your "Reset All" button.
         //================================================================================
-        public void ResetAllToDefault()
+        public static void ResetAllBindings()
         {
-            // We just need any valid action from this RebindActionUI to find its actionMap.
-            if (!ResolveActionAndBinding(out var action, out var bindingIndex))
+            if (s_RebindActionUIs == null || s_RebindActionUIs.Count == 0)
                 return;
 
-            var actionMap = action.actionMap;
-            if (actionMap == null)
-                return;
-
-            // Remove overrides from every binding in the entire action map.
-            foreach (var mapAction in actionMap.actions)
+            // Gather all unique action maps from the active RebindActionUI components.
+            HashSet<InputActionMap> actionMaps = new HashSet<InputActionMap>();
+            foreach (var rebindUI in s_RebindActionUIs)
             {
-                for (int i = 0; i < mapAction.bindings.Count; i++)
+                if (rebindUI.m_Action != null && rebindUI.m_Action.action != null && rebindUI.m_Action.action.actionMap != null)
+                    actionMaps.Add(rebindUI.m_Action.action.actionMap);
+            }
+
+            // For each action map, remove overrides from every binding of every action.
+            foreach (var map in actionMaps)
+            {
+                foreach (var action in map.actions)
                 {
-                    mapAction.RemoveBindingOverride(i);
+                    for (int i = 0; i < action.bindings.Count; i++)
+                    {
+                        action.RemoveBindingOverride(i);
+                    }
                 }
             }
 
-            // Refresh the UI to show default bindings.
-            UpdateBindingDisplay();
+            // Update the UI for every RebindActionUI component.
+            foreach (var rebindUI in s_RebindActionUIs)
+            {
+                rebindUI.UpdateBindingDisplay();
+            }
         }
 
         /// <summary>
@@ -330,8 +339,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                         UpdateBindingDisplay();
                         CleanUp();
 
-                        // If there's more composite parts we should bind, initiate a rebind
-                        // for the next part.
+                        // If there are more composite parts to bind, initiate a rebind for the next part.
                         if (allCompositeParts)
                         {
                             var nextBindingIndex = bindingIndex + 1;
@@ -355,12 +363,11 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
                 m_RebindText.text = text;
             }
 
-            // If we have no rebind overlay and no callback but we have a binding text label,
-            // temporarily set the binding text label to "<Waiting>".
+            // If we have no rebind overlay and no rebind text, temporarily set the binding text label to "<Waiting>".
             if (m_RebindOverlay == null && m_RebindText == null && m_RebindStartEvent == null && m_BindingText != null)
                 m_BindingText.text = "<Waiting...>";
 
-            // Give listeners a chance to act on the rebind starting.
+            // Notify listeners that the rebind is starting.
             m_RebindStartEvent?.Invoke(this, m_RebindOperation);
 
             m_RebindOperation.Start();
@@ -419,6 +426,7 @@ namespace UnityEngine.InputSystem.Samples.RebindUI
             }
         }
 
+        // Called when the action system re-resolves bindings.
         private static void OnActionChange(object obj, InputActionChange change)
         {
             if (change != InputActionChange.BoundControlsChanged)

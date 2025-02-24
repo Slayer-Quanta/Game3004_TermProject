@@ -283,7 +283,7 @@ MonoBehaviour:
       - m_Target: {fileID: 6680292650503350826, guid: f25dcd618d3acd64795bf8bb32edb6c9, type: 3}
         m_TargetAssemblyTypeName: UnityEngine.InputSystem.Samples.RebindUI.RebindActionUI,
           Unity.InputSystem.RebindingUI
-        m_MethodName: ResetAllToDefault
+        m_MethodName: ResetAllBindings
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
