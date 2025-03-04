@@ -1,0 +1,39 @@
+name: Build and Deploy Unity WebGL
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Cache Library Files
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            Library-${{ runner.os }}-
+
+      - name: Setup Unity
+        uses: game-ci/unity-builder@v2
+        with:
+          targetPlatform: WebGL
+          unityVersion: 6000.0.33f1
+
+      - name: Build Unity WebGL
+        run: |
+          mkdir -p build
+          mv build/* build || true  
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          repository-name: Slayer-Quanta/Game3004_TermProject 
+          branch: gh-pages
+          folder: build  
