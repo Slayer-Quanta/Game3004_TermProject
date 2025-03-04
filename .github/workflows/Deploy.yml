@@ -12,14 +12,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Cache Library Files
-        uses: actions/cache@v3
-        with:
-          path: Library
-          key: Library-${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            Library-${{ runner.os }}-
-
       - name: Setup Unity
         uses: game-ci/unity-builder@v2
         with:
