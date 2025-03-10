@@ -220,7 +220,7 @@ RectTransform:
   m_GameObject: {fileID: 382090682}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.8818549, y: 1.7112, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1092621923}
@@ -522,7 +522,7 @@ RectTransform:
   m_GameObject: {fileID: 752419762}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2.0751188, y: 2.2619, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1955612623}
@@ -930,8 +930,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 434c36e4ec2922d40a1beffe93518d87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainMenuCanvas: {fileID: 0}
   optionsPanel: {fileID: 382090682}
   settingsPanel: {fileID: 752419762}
+  worldCreationCanvas: {fileID: 0}
 --- !u!1 &1044874285
 GameObject:
   m_ObjectHideFlags: 0

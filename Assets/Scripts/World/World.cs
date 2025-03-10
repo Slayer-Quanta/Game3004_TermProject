@@ -46,12 +46,18 @@ public class World : MonoBehaviour
 		};
 	}
 
-	public async void GenerateWorld()
-	{
-		await GenerateWorld(Vector3Int.zero);
-	}
-
-	private async Task GenerateWorld(Vector3Int position)
+    public async void GenerateWorld()
+    {
+        if (!FindExistingPlayer()) 
+        {
+            await GenerateWorld(Vector3Int.zero);
+        }
+        else
+        {
+            Debug.Log("Player already exists. Skipping player generation.");
+        }
+    }
+    private async Task GenerateWorld(Vector3Int position)
 	{
 		terrainGenerator.GenerateBiomePoints(position, chunkDrawingRange, chunkSize, mapSeedOffset);
 
@@ -303,7 +309,19 @@ public class World : MonoBehaviour
 		return Chunk.GetBlockFromChunkCoordinates(containerChunk, blockInCHunkCoordinates);
 	}
 
-	public void OnDisable()
+    private bool FindExistingPlayer()
+    {
+        GameObject existingPlayer = GameObject.FindWithTag("Player");
+
+        if (existingPlayer != null)
+        {
+            return true; 
+        }
+
+        return false; 
+    }
+
+    public void OnDisable()
 	{
 		taskTokenSource.Cancel();
 	}

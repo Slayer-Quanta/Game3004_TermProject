@@ -60,7 +60,11 @@ public class Character : MonoBehaviour
             animator.SetFloat("speed", 0);
             animator.SetBool("isGrounded", false);
             animator.ResetTrigger("jump");
-            playerMovement.Fly(playerInput.MovementInput, playerInput.IsJumping, playerInput.RunningPressed);
+
+            // Fly using the joystick movement and input for ascend/descend
+            bool ascendInput = playerInput.IsJumping;
+            bool descendInput = playerInput.RunningPressed;
+            playerMovement.Fly(ascendInput, descendInput);
         }
         else
         {
@@ -83,8 +87,9 @@ public class Character : MonoBehaviour
                     AudioManager.instance.PlayWalkSound();
             }
 
+            // Handle Gravity and Walking
             playerMovement.HandleGravity(playerInput.IsJumping);
-            playerMovement.Walk(playerInput.MovementInput, playerInput.RunningPressed);
+            playerMovement.Walk(playerInput.RunningPressed);
         }
     }
 

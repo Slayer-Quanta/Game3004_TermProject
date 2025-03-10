@@ -1,15 +1,46 @@
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
+    [SerializeField] private GameObject mainMenuCanvas;
     [SerializeField] private GameObject optionsPanel;
     [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private GameObject worldCreationCanvas;
+
+    private string savePath => Application.persistentDataPath + "/savegame.json";
+
+    private void Start()
+    {
+        worldCreationCanvas.SetActive(false); 
+    }
 
     public void PlayGame()
     {
+        SaveSystem.DeleteSave(); 
         AudioManager.instance.PlayButtonClick();
-        SceneManager.LoadSceneAsync(4);
+        SceneManager.LoadSceneAsync(4); 
+    }
+
+    public void LoadGame()
+    {
+        if (SaveSystem.ShouldLoadGame())
+        {
+            AudioManager.instance.PlayButtonClick();
+            SceneManager.LoadSceneAsync(4);
+        }
+        else
+        {
+            Debug.Log("No saved game found.");
+        }
+    }
+
+    public void ToggleWorldCreationCanvas()
+    {
+        bool isActive = worldCreationCanvas.activeSelf;
+        worldCreationCanvas.SetActive(!isActive);
+        mainMenuCanvas.SetActive(isActive);
     }
 
     public void Options()
@@ -42,7 +73,7 @@ public class MainMenu : MonoBehaviour
         Application.Quit();
     }
 
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -50,7 +81,7 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    void QuitGame()
+    private void QuitGame()
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.ExitPlaymode();
@@ -77,6 +108,6 @@ public class MainMenu : MonoBehaviour
     public void KeyboardOptions()
     {
         AudioManager.instance.PlayButtonClick();
-        SceneManager.LoadSceneAsync(5); 
+        SceneManager.LoadSceneAsync(5);
     }
 }

@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 7040412690683803284}
   m_Layer: 0
   m_Name: AnimatedPlayerRaw
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -240,6 +240,10 @@ MonoBehaviour:
     m_Bits: 8
   rayDistance: 0.12
   <IsGrounded>k__BackingField: 0
+  joystick: {fileID: 0}
+  jumpButton: {fileID: 0}
+  mainCamera: {fileID: 0}
+  lookSpeed: 200
 --- !u!114 &7040412690683803284
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,6 +260,7 @@ MonoBehaviour:
   playerInput: {fileID: 4196351109005602393}
   playerMovement: {fileID: 4027023925208676324}
   pauseMenu: {fileID: 0}
+  explosionPrefab: {fileID: 6813416509558619124, guid: 3b7f2c753d435d647a80f1f047a113e3, type: 3}
   interactionRayLength: 5
   groundMask:
     serializedVersion: 2
@@ -263,7 +268,6 @@ MonoBehaviour:
   fly: 0
   animator: {fileID: 116692707738079568}
   world: {fileID: 0}
-  explosionPrefab: {fileID: 6813416509558619124, guid: 3b7f2c753d435d647a80f1f047a113e3, type: 3}
 --- !u!1001 &116692707728663600
 PrefabInstance:
   m_ObjectHideFlags: 0
