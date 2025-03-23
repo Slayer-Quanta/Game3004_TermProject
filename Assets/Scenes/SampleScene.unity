@@ -408,7 +408,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &86234502
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6682,6 +6682,8 @@ MonoBehaviour:
   worldRenderer: {fileID: 1698129519}
   terrainGenerator: {fileID: 761396187}
   mapSeedOffset: {x: 0, y: 0}
+  Menu: {fileID: 589777317}
+  minimapborder: {fileID: 1253828166}
   OnWorldCreated:
     m_PersistentCalls:
       m_Calls:
@@ -8106,7 +8108,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2048965127
 RectTransform:
   m_ObjectHideFlags: 0

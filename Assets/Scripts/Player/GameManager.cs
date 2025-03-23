@@ -29,20 +29,28 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        if (SaveSystem.ShouldLoadGame()) 
+        if (SaveSystem.ShouldLoadGame())
         {
-            SpawnPlayer();
-
-            Vector3? savedPosition = SaveSystem.LoadGame();
-
-            if (savedPosition.HasValue && player != null)
+            if (world == null || world.worldData.chunkDataDictionary == null)
             {
-                player.transform.position = savedPosition.Value;
-                Debug.Log("Loaded saved position.");
+                Debug.LogError("World is not initialized. Make sure the World component is properly set up.");
+                return;
             }
-            else
+
+
+            if (SaveSystem.LoadGame(world, out Vector3? savedPosition))
             {
-                Debug.Log("No save found. Starting new game.");
+                SpawnPlayer();
+
+                if (savedPosition.HasValue && player != null)
+                {
+                    player.transform.position = savedPosition.Value;
+                    Debug.Log("Loaded saved position and world data.");
+                }
+                else
+                {
+                    Debug.Log("No saved position found. Starting new game.");
+                }
             }
         }
         else
@@ -59,7 +67,7 @@ public class GameManager : MonoBehaviour
 
     public void StartNewGame()
     {
-        SaveSystem.DeleteSave(); 
+        SaveSystem.DeleteSave();
         SpawnPlayer();
     }
 
@@ -113,7 +121,7 @@ public class GameManager : MonoBehaviour
     {
         for (int i = 0; i < enemyCount; i++)
         {
-            Vector3 spawnPosition = new Vector3(Random.Range(enemySpawnRangeX.x, enemySpawnRangeX.y), 100, Random.Range(enemySpawnRangeY.x, enemySpawnRangeY.y));
+            Vector3 spawnPosition = new Vector3(Random.Range(enemySpawnRangeX.x, enemySpawnRangeY.y), 100, Random.Range(enemySpawnRangeY.x, enemySpawnRangeY.y));
 
             if (Physics.Raycast(spawnPosition, Vector3.down, out RaycastHit hit, 120))
             {

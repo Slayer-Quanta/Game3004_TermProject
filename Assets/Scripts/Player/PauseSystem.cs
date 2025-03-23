@@ -11,7 +11,9 @@ public class PauseSystem : MonoBehaviour
     public GameObject healthBarCanvas;
     public GameObject pauseMenuUI;
     public Button resumeButton, saveButton, loadButton, quitButton;
+
     private GameObject player;
+    private World world;
 
     private void Awake()
     {
@@ -21,6 +23,7 @@ public class PauseSystem : MonoBehaviour
     private void Start()
     {
         player = GameObject.FindWithTag("Player");
+        world = FindObjectOfType<World>();
 
         pauseMenuUI.SetActive(false);
         resumeButton.onClick.AddListener(ResumeGame);
@@ -43,7 +46,8 @@ public class PauseSystem : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
-            SaveGame();  
+
+            SaveGame();
         }
         else
         {
@@ -51,6 +55,7 @@ public class PauseSystem : MonoBehaviour
             Cursor.visible = false;
         }
     }
+
     public void ResumeGame()
     {
         Time.timeScale = 1;
@@ -59,24 +64,28 @@ public class PauseSystem : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+
     public void SaveGame()
     {
         if (player == null)
             player = GameObject.FindWithTag("Player");
 
-        if (player != null)
+        if (world == null)
+            world = FindObjectOfType<World>();
+
+        if (player != null && world != null)
         {
-            SaveSystem.SaveGame(player.transform.position);
+            SaveSystem.SaveGame(player.transform.position, world);
         }
         else
         {
-            Debug.LogWarning("Player not found. Cannot save the game.");
+            Debug.LogWarning("Player or World not found. Cannot save the game.");
         }
     }
 
     public void LoadGame()
     {
-        if (SaveSystem.ShouldLoadGame())  
+        if (SaveSystem.ShouldLoadGame())
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }

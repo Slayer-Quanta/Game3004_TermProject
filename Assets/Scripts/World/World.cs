@@ -21,8 +21,10 @@ public class World : MonoBehaviour
 
 	public TerrainGenerator terrainGenerator;
 	public Vector2Int mapSeedOffset;
+    public GameObject Menu;
+    public GameObject minimapborder;
 
-	CancellationTokenSource taskTokenSource = new CancellationTokenSource();
+    CancellationTokenSource taskTokenSource = new CancellationTokenSource();
 
 
 	//public Dictionary<Vector3Int, ChunkData> chunkDataDictionary = new Dictionary<Vector3Int, ChunkData>();
@@ -33,30 +35,48 @@ public class World : MonoBehaviour
 	public WorldData worldData { get; private set; }
 	public bool IsWorldCreated { get; private set; }
 
-	private void Awake()
-	{
-		self = this;
+    private void Awake()
+    {
+        self = this;
 
-		worldData = new WorldData
-		{
-			chunkHeight = this.chunkHeight,
-			chunkSize = this.chunkSize,
-			chunkDataDictionary = new Dictionary<Vector3Int, ChunkData>(),
-			chunkDictionary = new Dictionary<Vector3Int, ChunkRenderer>()
-		};
-	}
+        // Check if the dictionaries in worldData are initialized, not worldData itself.
+        if (worldData.chunkDataDictionary == null || worldData.chunkDictionary == null)
+        {
+            worldData = new WorldData
+            {
+                chunkHeight = this.chunkHeight,
+                chunkSize = this.chunkSize,
+                chunkDataDictionary = new Dictionary<Vector3Int, ChunkData>(),
+                chunkDictionary = new Dictionary<Vector3Int, ChunkRenderer>()
+            };
+        }
+    }
+
+
+    void Start()
+    {
+        GenerateWorld(); // Automatically generate the world at scene start.
+
+        // Disable the menu and enable the minimapborder
+        if (Menu != null) Menu.SetActive(false);
+        if (minimapborder != null) minimapborder.SetActive(true);
+    }
 
     public async void GenerateWorld()
     {
-        if (!FindExistingPlayer()) 
+        if (SaveSystem.ShouldLoadGame())
         {
-            await GenerateWorld(Vector3Int.zero);
+            Vector3? loadedPosition = null;
+            if (SaveSystem.LoadGame(this, out loadedPosition) && loadedPosition.HasValue)
+            {
+                Debug.Log("Loaded existing world.");
+                return; 
+            }
         }
-        else
-        {
-            Debug.Log("Player already exists. Skipping player generation.");
-        }
+
+        await GenerateWorld(Vector3Int.zero);
     }
+
     private async Task GenerateWorld(Vector3Int position)
 	{
 		terrainGenerator.GenerateBiomePoints(position, chunkDrawingRange, chunkSize, mapSeedOffset);

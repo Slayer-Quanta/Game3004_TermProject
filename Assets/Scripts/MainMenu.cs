@@ -13,14 +13,14 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
-        worldCreationCanvas.SetActive(false); 
+        worldCreationCanvas.SetActive(false);
     }
 
     public void PlayGame()
     {
-        SaveSystem.DeleteSave(); 
+        SaveSystem.DeleteSave();  // Clear any previous save file to start fresh
         AudioManager.instance.PlayButtonClick();
-        SceneManager.LoadSceneAsync(4); 
+        SceneManager.LoadSceneAsync(4);  // Load your game scene
     }
 
     public void LoadGame()
@@ -28,7 +28,7 @@ public class MainMenu : MonoBehaviour
         if (SaveSystem.ShouldLoadGame())
         {
             AudioManager.instance.PlayButtonClick();
-            SceneManager.LoadSceneAsync(4);
+            SceneManager.LoadSceneAsync(4);  // Load the saved game
         }
         else
         {
@@ -46,25 +46,25 @@ public class MainMenu : MonoBehaviour
     public void Options()
     {
         AudioManager.instance.PlayButtonClick();
-        SceneManager.LoadSceneAsync(2);
+        SceneManager.LoadSceneAsync(2);  // Load Options Menu
     }
 
     public void Instructions()
     {
         AudioManager.instance.PlayButtonClick();
-        SceneManager.LoadSceneAsync(1);
+        SceneManager.LoadSceneAsync(1);  // Load Instructions Screen
     }
 
     public void Achievements()
     {
         AudioManager.instance.PlayButtonClick();
-        SceneManager.LoadSceneAsync(3);
+        SceneManager.LoadSceneAsync(3);  // Load Achievements Screen
     }
 
     public void Home()
     {
         AudioManager.instance.PlayButtonClick();
-        SceneManager.LoadSceneAsync(0);
+        SceneManager.LoadSceneAsync(0);  // Load Main Menu
     }
 
     public void Exit()
@@ -108,6 +108,6 @@ public class MainMenu : MonoBehaviour
     public void KeyboardOptions()
     {
         AudioManager.instance.PlayButtonClick();
-        SceneManager.LoadSceneAsync(5);
+        SceneManager.LoadSceneAsync(5);  // Load Keyboard Settings
     }
 }

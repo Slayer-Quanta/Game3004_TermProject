@@ -1393,7 +1393,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1231039654}
   - component: {fileID: 1231039653}
-  - component: {fileID: 1231039655}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -1428,23 +1427,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1231039655
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1231039652}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 07a28d70c602d464b9a3123b6b51953c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  slotContainer: {fileID: 1192171830}
-  saveSlotPrefab: {fileID: 4350781605473150672, guid: 26656ef6295c99a4bb7146be155305ce, type: 3}
-  saveSlots: []
-  currentPlayTime: 0
-  selectedSlot: 1
 --- !u!1 &1363655694
 GameObject:
   m_ObjectHideFlags: 0
