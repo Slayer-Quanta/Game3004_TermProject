@@ -9,17 +9,27 @@ public class Character : MonoBehaviour
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private PauseSystem pauseMenu;
     [SerializeField] private GameObject explosionPrefab;
+    [SerializeField] private Transform headTransform;
 
+    [Header("Interaction Settings")]
     public float interactionRayLength = 5;
     public LayerMask groundMask;
     public bool fly = false;
+
+    [Header("Animation")]
     public Animator animator;
-    bool isWaiting = false;
+    private bool isWaiting = false;
     public World world;
 
+    [Header("Block Interaction")]
+    [SerializeField] private float doubleClickThreshold = 0.5f;
     private float lastClickTime = 0f;
-    private float doubleClickThreshold = 0.5f;
     private Vector3Int lastClickedBlockPos = Vector3Int.zero;
+
+    [Header("Head Movement")]
+    [SerializeField] private float headTiltAmount = 5f;
+    [SerializeField] private float headTiltSpeed = 3f;
+    private float currentHeadTilt = 0f;
 
     private void Awake()
     {
@@ -28,6 +38,10 @@ public class Character : MonoBehaviour
         playerInput = GetComponent<PlayerInput>();
         playerMovement = GetComponent<PlayerMovement>();
         world = FindObjectOfType<World>();
+
+        // If no specific head transform is assigned, use the camera transform
+        if (headTransform == null)
+            headTransform = mainCamera.transform;
     }
 
     private void Start()
@@ -55,42 +69,79 @@ public class Character : MonoBehaviour
 
     void Update()
     {
+        UpdateHeadTilt();
+
         if (fly)
         {
-            animator.SetFloat("speed", 0);
-            animator.SetBool("isGrounded", false);
-            animator.ResetTrigger("jump");
-
-            // Fly using the joystick movement and input for ascend/descend
-            bool ascendInput = playerInput.IsJumping;
-            bool descendInput = playerInput.RunningPressed;
-            playerMovement.Fly(ascendInput, descendInput);
+            HandleFlyMode();
         }
         else
         {
-            animator.SetBool("isGrounded", playerMovement.IsGrounded);
-
-            if (playerMovement.IsGrounded && playerInput.IsJumping && !isWaiting)
-            {
-                animator.SetTrigger("jump");
-                AudioManager.instance.PlayJumpSound();
-                isWaiting = true;
-                StopAllCoroutines();
-                StartCoroutine(ResetWaiting());
-            }
-
-            animator.SetFloat("speed", playerInput.MovementInput.magnitude);
-
-            if (playerMovement.IsGrounded && playerInput.MovementInput.magnitude > 0)
-            {
-                if (!AudioManager.instance.sfxSource.isPlaying)
-                    AudioManager.instance.PlayWalkSound();
-            }
-
-            // Handle Gravity and Walking
-            playerMovement.HandleGravity(playerInput.IsJumping);
-            playerMovement.Walk(playerInput.RunningPressed);
+            HandleWalkMode();
         }
+    }
+
+    private void UpdateHeadTilt()
+    {
+        // Apply head tilt based on movement direction and speed
+        if (playerMovement.IsGrounded && playerInput.MovementInput.magnitude > 0.1f)
+        {
+            // Calculate target tilt based on horizontal movement
+            float targetTilt = playerInput.MovementInput.x * headTiltAmount;
+
+            // Smoothly interpolate to target tilt
+            currentHeadTilt = Mathf.Lerp(currentHeadTilt, targetTilt, Time.deltaTime * headTiltSpeed);
+        }
+        else
+        {
+            // Return to neutral when not moving
+            currentHeadTilt = Mathf.Lerp(currentHeadTilt, 0f, Time.deltaTime * headTiltSpeed);
+        }
+
+        // Apply the tilt rotation around the forward axis (z-axis roll)
+        if (headTransform != null)
+        {
+            Vector3 currentRotation = headTransform.localEulerAngles;
+            headTransform.localEulerAngles = new Vector3(currentRotation.x, currentRotation.y, currentHeadTilt);
+        }
+    }
+
+    private void HandleFlyMode()
+    {
+        animator.SetFloat("speed", 0);
+        animator.SetBool("isGrounded", false);
+        animator.ResetTrigger("jump");
+
+        // Fly using the joystick movement and input for ascend/descend
+        bool ascendInput = playerInput.IsJumping;
+        bool descendInput = playerInput.RunningPressed;
+        playerMovement.Fly(ascendInput, descendInput);
+    }
+
+    private void HandleWalkMode()
+    {
+        animator.SetBool("isGrounded", playerMovement.IsGrounded);
+
+        if (playerMovement.IsGrounded && playerInput.IsJumping && !isWaiting)
+        {
+            animator.SetTrigger("jump");
+            AudioManager.instance.PlayJumpSound();
+            isWaiting = true;
+            StopAllCoroutines();
+            StartCoroutine(ResetWaiting());
+        }
+
+        animator.SetFloat("speed", playerInput.MovementInput.magnitude);
+
+        if (playerMovement.IsGrounded && playerInput.MovementInput.magnitude > 0)
+        {
+            if (!AudioManager.instance.sfxSource.isPlaying)
+                AudioManager.instance.PlayWalkSound();
+        }
+
+        // Handle Gravity and Walking
+        playerMovement.HandleGravity(playerInput.IsJumping);
+        playerMovement.Walk(playerInput.RunningPressed);
     }
 
     IEnumerator ResetWaiting()

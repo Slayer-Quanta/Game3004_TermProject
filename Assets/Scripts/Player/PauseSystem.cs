@@ -56,15 +56,37 @@ public class PauseSystem : MonoBehaviour
         }
     }
 
+    // Modify the LoadGame method
+    public void LoadGame()
+    {
+        if (SaveSystem.ShouldLoadGame())
+        {
+            Debug.Log("Loading game...");
+
+            // First resume the game to set timeScale to 1
+            ResumeGame();
+
+            // Then reload the scene
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+        else
+        {
+            Debug.Log("No saved game found.");
+        }
+    }
+
+    // Ensure ResumeGame properly resets state
     public void ResumeGame()
     {
         Time.timeScale = 1;
         pauseMenuUI.SetActive(false);
-        healthBarCanvas.SetActive(true);
+        if (healthBarCanvas != null)
+            healthBarCanvas.SetActive(true);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
+    // Update SaveGame to include proper error checking
     public void SaveGame()
     {
         if (player == null)
@@ -75,23 +97,12 @@ public class PauseSystem : MonoBehaviour
 
         if (player != null && world != null)
         {
+            Debug.Log("Saving game at position: " + player.transform.position);
             SaveSystem.SaveGame(player.transform.position, world);
         }
         else
         {
             Debug.LogWarning("Player or World not found. Cannot save the game.");
-        }
-    }
-
-    public void LoadGame()
-    {
-        if (SaveSystem.ShouldLoadGame())
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
-        else
-        {
-            Debug.Log("No saved game found.");
         }
     }
 

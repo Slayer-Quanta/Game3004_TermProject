@@ -3,43 +3,35 @@ using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField]
-    private CharacterController controller;
+    [SerializeField] private CharacterController controller;
 
-    [Space]
-    [SerializeField]
-    private float playerSpeed = 5.0f, playerRunSpeed = 8;
-    [SerializeField]
-    private float jumpHeight = 1.0f;
-    [SerializeField]
-    private float gravityValue = -9.81f;
-    [SerializeField]
-    private float flySpeed = 2;
+    [Header("Movement Settings")]
+    [SerializeField] private float playerSpeed = 5.0f;
+    [SerializeField] private float playerRunSpeed = 8f;
+    [SerializeField] private float jumpHeight = 1.0f;
+    [SerializeField] private float gravityValue = -9.81f;
+    [SerializeField] private float flySpeed = 2f;
+    [SerializeField] private float rotationSpeed = 10f;
+    [SerializeField] private float acceleration = 8f;
+    [SerializeField] private float deceleration = 10f;
 
     private Vector3 playerVelocity;
+    private Vector3 currentMovement;
+    private float currentSpeed;
 
     [Header("Grounded check parameters:")]
-    [SerializeField]
-    private LayerMask groundMask;
-    [SerializeField]
-    private float rayDistance = 1;
-    [field: SerializeField]
-    public bool IsGrounded { get; private set; }
+    [SerializeField] private LayerMask groundMask;
+    [SerializeField] private float rayDistance = 1f;
+    [field: SerializeField] public bool IsGrounded { get; private set; }
 
     [Header("Mobile Input")]
-    [SerializeField]
-    private FixedJoystick joystick;
-    [SerializeField]
-    private Button jumpButton;
+    [SerializeField] private FixedJoystick joystick;
+    [SerializeField] private Button jumpButton;
 
     [Header("Camera")]
-    [SerializeField]
-    private Transform mainCamera;
-    [SerializeField]
-    private float lookSpeed = 200f;
-
-    private bool isLooking = false;
-    private Vector2 lastTouchPosition;
+    [SerializeField] private Transform mainCamera;
+    [SerializeField] private PlayerCamera playerCamera;
+    [SerializeField] private float headBobAmplitude = 0.05f;
 
     private void Awake()
     {
@@ -56,113 +48,123 @@ public class PlayerMovement : MonoBehaviour
 
         if (mainCamera == null)
             mainCamera = Camera.main.transform;
+
+        if (playerCamera == null)
+            playerCamera = mainCamera.GetComponent<PlayerCamera>();
     }
 
     private Vector3 GetMovementDirection()
     {
-        Vector3 inputDirection = new Vector3(joystick.Horizontal, 0, joystick.Vertical);
-        if (inputDirection.magnitude < 0.1f) return Vector3.zero;
+        // Get raw joystick input
+        Vector2 input = new Vector2(joystick.Horizontal, joystick.Vertical);
 
+        // Apply deadzone for better control
+        if (input.magnitude < 0.1f)
+            return Vector3.zero;
+
+        // Normalize input if it exceeds 1 (for diagonal movement)
+        if (input.magnitude > 1f)
+            input = input.normalized;
+
+        // Convert joystick input to world space direction relative to camera
         Vector3 cameraForward = mainCamera.forward;
         Vector3 cameraRight = mainCamera.right;
 
+        // Remove vertical component for horizontal movement only
         cameraForward.y = 0f;
         cameraRight.y = 0f;
 
+        // Normalize to ensure consistent speed in all directions
         cameraForward.Normalize();
         cameraRight.Normalize();
 
-        return cameraRight * inputDirection.x + cameraForward * inputDirection.z;
+        // Calculate final movement direction
+        return cameraRight * input.x + cameraForward * input.y;
     }
 
     public void Fly(bool ascendInput, bool descendInput)
     {
-        Vector3 movementDirection = GetMovementDirection();
+        Vector3 targetDirection = GetMovementDirection();
 
+        // Add vertical movement for flying
         if (ascendInput)
-            movementDirection += Vector3.up * flySpeed;
+            targetDirection += Vector3.up;
         else if (descendInput)
-            movementDirection -= Vector3.up * flySpeed;
+            targetDirection -= Vector3.up;
 
-        controller.Move(movementDirection * playerSpeed * Time.deltaTime);
+        // Smooth acceleration for more natural movement
+        currentMovement = Vector3.Lerp(currentMovement, targetDirection * playerSpeed, Time.deltaTime * acceleration);
+
+        // Apply movement
+        controller.Move(currentMovement * Time.deltaTime);
     }
 
     public void Walk(bool runningInput)
     {
-        Vector3 movementDirection = GetMovementDirection();
-        float speed = runningInput ? playerRunSpeed : playerSpeed;
+        Vector3 targetDirection = GetMovementDirection();
+        float targetSpeed = runningInput ? playerRunSpeed : playerSpeed;
 
-        controller.Move(movementDirection * Time.deltaTime * speed);
+        // Calculate smooth acceleration or deceleration
+        if (targetDirection.magnitude > 0.1f)
+        {
+            // Accelerate when moving
+            currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * acceleration);
+        }
+        else
+        {
+            // Decelerate when stopping
+            currentSpeed = Mathf.Lerp(currentSpeed, 0, Time.deltaTime * deceleration);
+        }
+
+        // Apply movement
+        Vector3 movement = targetDirection * currentSpeed * Time.deltaTime;
+        controller.Move(movement);
+
+        // Apply head bobbing effect if moving and on ground
+        if (IsGrounded && playerCamera != null)
+        {
+            playerCamera.ApplyHeadBob(movement.magnitude, headBobAmplitude);
+        }
     }
 
     public void HandleGravity(bool isJumping)
     {
         if (controller.isGrounded && playerVelocity.y < 0)
         {
-            playerVelocity.y = 0f;
+            playerVelocity.y = -0.5f; // Small downward force to keep grounded
         }
+
         if (isJumping && IsGrounded)
             AddJumpForce();
+
         ApplyGravityForce();
         controller.Move(playerVelocity * Time.deltaTime);
     }
 
     private void AddJumpForce()
     {
-        playerVelocity.y = jumpHeight;
+        // Calculate jump force based on gravity and desired height
+        playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravityValue);
     }
 
     private void ApplyGravityForce()
     {
         playerVelocity.y += gravityValue * Time.deltaTime;
-        playerVelocity.y = Mathf.Clamp(playerVelocity.y, gravityValue, 10);
+
+        // Limit terminal velocity
+        float terminalVelocity = gravityValue * 2;
+        playerVelocity.y = Mathf.Max(playerVelocity.y, terminalVelocity);
     }
 
     private void FixedUpdate()
     {
+        // Check if player is grounded
         IsGrounded = Physics.Raycast(transform.position, Vector3.down, rayDistance, groundMask);
     }
 
     private void OnDrawGizmos()
     {
+        Gizmos.color = IsGrounded ? Color.green : Color.red;
         Gizmos.DrawRay(transform.position, Vector3.down * rayDistance);
-    }
-
-    private void Update()
-    {
-        HandleCameraLook();
-    }
-
-    private void HandleCameraLook()
-    {
-        if (Input.touchCount > 0)
-        {
-            Touch touch = Input.GetTouch(0);
-
-            if (touch.phase == TouchPhase.Began)
-            {
-                isLooking = true;
-                lastTouchPosition = touch.position;
-            }
-            else if (touch.phase == TouchPhase.Moved && isLooking)
-            {
-                Vector2 touchDelta = touch.position - lastTouchPosition;
-                lastTouchPosition = touch.position;
-
-                // Rotate the camera and player horizontally
-                float horizontalRotation = touchDelta.x * lookSpeed * Time.deltaTime;
-                transform.Rotate(0, horizontalRotation, 0);
-
-                // Rotate the camera vertically (Look Up/Down)
-                float verticalRotation = -touchDelta.y * lookSpeed * Time.deltaTime;
-                Vector3 currentAngles = mainCamera.localEulerAngles;
-                currentAngles.x = Mathf.Clamp(currentAngles.x + verticalRotation, -80f, 80f);
-                mainCamera.localEulerAngles = currentAngles;
-            }
-            else if (touch.phase == TouchPhase.Ended)
-            {
-                isLooking = false;
-            }
-        }
     }
 }

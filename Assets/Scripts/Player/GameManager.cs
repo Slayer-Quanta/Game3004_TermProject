@@ -27,35 +27,101 @@ public class GameManager : MonoBehaviour
     public Vector2 enemySpawnRangeY = new Vector2(-100, 100);
     List<Enemy> enemies = new List<Enemy>();
 
+
     private void Start()
     {
+        // Ensure time scale is set to 1 at start
+        Time.timeScale = 1;
+
         if (SaveSystem.ShouldLoadGame())
         {
-            if (world == null || world.worldData.chunkDataDictionary == null)
+            if (world == null)
             {
-                Debug.LogError("World is not initialized. Make sure the World component is properly set up.");
-                return;
+                world = FindObjectOfType<World>();
+                if (world == null)
+                {
+                    Debug.LogError("World component not found in scene.");
+                    return;
+                }
             }
 
-
-            if (SaveSystem.LoadGame(world, out Vector3? savedPosition))
+            // Initialize worldData if needed
+            if (world.worldData == null)
             {
-                SpawnPlayer();
+                world.worldData = new WorldData
+                {
+                    chunkHeight = world.chunkHeight,
+                    chunkSize = world.chunkSize,
+                    chunkDataDictionary = new Dictionary<Vector3Int, ChunkData>(),
+                    chunkDictionary = new Dictionary<Vector3Int, ChunkRenderer>()
+                };
+            }
 
-                if (savedPosition.HasValue && player != null)
-                {
-                    player.transform.position = savedPosition.Value;
-                    Debug.Log("Loaded saved position and world data.");
-                }
-                else
-                {
-                    Debug.Log("No saved position found. Starting new game.");
-                }
+            // Load the world first
+            Vector3? savedPosition = null;
+            if (SaveSystem.LoadGame(world, out savedPosition))
+            {
+                // Wait for world to finish generating before spawning player
+                world.OnWorldCreated.AddListener(() => {
+                    // Then spawn the player at the saved position
+                    player = GameObject.FindWithTag("Player");
+                    if (player == null)
+                    {
+                        player = Instantiate(playerPrefab, savedPosition.Value, Quaternion.identity);
+                        player.tag = "Player";
+                    }
+                    else
+                    {
+                        player.transform.position = savedPosition.Value;
+                    }
+
+                    Debug.Log("Loaded saved position at: " + savedPosition.Value);
+
+                    // Important: Setup player and camera references after position is set
+                    SetupPlayerReferences();
+
+                    // Rebuild the NavMesh for AI navigation
+                    if (navMeshSurface != null)
+                    {
+                        navMeshSurface.BuildNavMesh();
+                    }
+
+                    // Start checking map position
+                    StartCheckingTheMap();
+                });
+            }
+            else
+            {
+                Debug.LogError("Failed to load game. Starting new game instead.");
+                StartNewGame();
             }
         }
         else
         {
             StartNewGame();
+        }
+    }
+    private void SetupPlayerReferences()
+    {
+        if (player != null)
+        {
+            // Connect camera to player
+            if (camera_VM != null)
+            {
+                camera_VM.Follow = player.transform.GetChild(0);
+            }
+
+            if (cameraBrain != null)
+            {
+                cameraBrain.enabled = true;
+            }
+
+            // Enable player controls if they have a controller component
+            var playerController = player.GetComponent<PlayerMovement>(); 
+            if (playerController != null)
+            {
+                playerController.enabled = true;
+            }
         }
     }
 
@@ -87,12 +153,15 @@ public class GameManager : MonoBehaviour
                 player = Instantiate(playerPrefab, hit.point + Vector3Int.up, Quaternion.identity);
                 player.tag = "Player";  // Make sure your player has the "Player" tag
 
-                camera_VM.Follow = player.transform.GetChild(0);
-                cameraBrain.enabled = true;
+                SetupPlayerReferences();
+
                 StartCheckingTheMap();
 
                 // Build the navmesh for AI navigation
-                navMeshSurface.BuildNavMesh();
+                if (navMeshSurface != null)
+                {
+                    navMeshSurface.BuildNavMesh();
+                }
 
                 // Spawn enemies after a delay
                 Waiter.Wait(5f, () =>
@@ -114,6 +183,10 @@ public class GameManager : MonoBehaviour
                     }
                 });
             }
+        }
+        else
+        {
+            SetupPlayerReferences();
         }
     }
 

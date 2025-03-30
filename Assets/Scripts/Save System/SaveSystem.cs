@@ -7,13 +7,22 @@ using UnityEngine;
 public class SaveData
 {
     public Vector3 playerPosition;
-    public Dictionary<Vector3Int, ChunkSaveData> worldChunks;
+    public ChunkEntry[] worldChunksArray; // Changed to array for serialization
+}
+
+[System.Serializable]
+public class ChunkEntry // Helper class for serialization
+{
+    public int posX;
+    public int posY;
+    public int posZ;
+    public ChunkSaveData chunkData;
 }
 
 [System.Serializable]
 public class ChunkSaveData
 {
-    public BlockType[] blocks; 
+    public BlockType[] blocks;
 }
 
 public class SaveSystem : MonoBehaviour
@@ -23,20 +32,28 @@ public class SaveSystem : MonoBehaviour
 
     public static void SaveGame(Vector3 playerPosition, World world)
     {
-        SaveData data = new SaveData
-        {
-            playerPosition = playerPosition,
-            worldChunks = new Dictionary<Vector3Int, ChunkSaveData>()
-        };
-
+        List<ChunkEntry> chunkEntries = new List<ChunkEntry>();
         foreach (var chunk in world.worldData.chunkDataDictionary)
         {
             ChunkSaveData chunkSaveData = new ChunkSaveData
             {
-                blocks = chunk.Value.blocks 
+                blocks = chunk.Value.blocks
             };
-            data.worldChunks.Add(chunk.Key, chunkSaveData);
+
+            chunkEntries.Add(new ChunkEntry
+            {
+                posX = chunk.Key.x,
+                posY = chunk.Key.y,
+                posZ = chunk.Key.z,
+                chunkData = chunkSaveData
+            });
         }
+
+        SaveData data = new SaveData
+        {
+            playerPosition = playerPosition,
+            worldChunksArray = chunkEntries.ToArray()
+        };
 
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(savePath, json);
@@ -62,30 +79,42 @@ public class SaveSystem : MonoBehaviour
             return false;
         }
 
-        string json = File.ReadAllText(savePath);
-        SaveData data = JsonUtility.FromJson<SaveData>(json);
-
-        playerPosition = data.playerPosition;
-
-        // Clear existing world data
-        world.worldData.chunkDataDictionary.Clear();
-
-        foreach (var chunkEntry in data.worldChunks)
+        try
         {
-            Vector3Int chunkPos = chunkEntry.Key;
-            ChunkSaveData savedChunk = chunkEntry.Value;
+            string json = File.ReadAllText(savePath);
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
 
-            // Create a new chunk and restore its block data
-            ChunkData newChunk = new ChunkData(world.chunkSize, world.chunkHeight, world, chunkPos);
-            newChunk.blocks = savedChunk.blocks;
+            playerPosition = data.playerPosition;
 
-            world.worldData.chunkDataDictionary.Add(chunkPos, newChunk);
+            // Clear existing world data
+            world.worldData.chunkDataDictionary.Clear();
+            world.worldData.chunkDictionary.Clear();
+
+            // Convert array back to dictionary
+            foreach (var entry in data.worldChunksArray)
+            {
+                Vector3Int chunkPos = new Vector3Int(entry.posX, entry.posY, entry.posZ);
+
+                // Create a new chunk and restore its block data
+                ChunkData newChunk = new ChunkData(world.chunkSize, world.chunkHeight, world, chunkPos);
+                newChunk.blocks = entry.chunkData.blocks;
+
+                world.worldData.chunkDataDictionary.Add(chunkPos, newChunk);
+            }
+
+            // Regenerate the world around player position
+            Vector3Int playerChunkPos = Vector3Int.FloorToInt(data.playerPosition);
+            world.RegenerateWorldFromSaveData(playerChunkPos);
+
+            Debug.Log("Game Loaded Successfully!");
+            return true;
         }
-
-        Debug.Log("Game Loaded!");
-        return true;
+        catch (Exception e)
+        {
+            Debug.LogError("Error loading game: " + e.Message);
+            return false;
+        }
     }
-
 
     public static void DeleteSave()
     {

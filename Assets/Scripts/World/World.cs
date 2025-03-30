@@ -32,15 +32,16 @@ public class World : MonoBehaviour
 
 	public UnityEvent OnWorldCreated, OnNewChunksGenerated;
 
-	public WorldData worldData { get; private set; }
-	public bool IsWorldCreated { get; private set; }
+    public WorldData worldData { get; set; } 
+
+    public bool IsWorldCreated { get; private set; }
 
     private void Awake()
     {
         self = this;
 
-        // Check if the dictionaries in worldData are initialized, not worldData itself.
-        if (worldData.chunkDataDictionary == null || worldData.chunkDictionary == null)
+        // Initialize worldData properly
+        if (worldData == null)
         {
             worldData = new WorldData
             {
@@ -340,7 +341,42 @@ public class World : MonoBehaviour
 
         return false; 
     }
+    public async void RegenerateWorldFromSaveData(Vector3Int playerPosition)
+    {
+        // Calculate which chunks need to be created based on loaded data
+        WorldGenerationData worldGenerationData = await Task.Run(() => GetPositionsThatPlayerSees(playerPosition), taskTokenSource.Token);
 
+        // Create mesh data for the loaded chunks
+        ConcurrentDictionary<Vector3Int, MeshData> meshDataDictionary = new ConcurrentDictionary<Vector3Int, MeshData>();
+
+        List<ChunkData> dataToRender = new List<ChunkData>();
+        foreach (var chunkPos in worldGenerationData.chunkPositionsToCreate)
+        {
+            if (worldData.chunkDataDictionary.TryGetValue(chunkPos, out ChunkData chunkData))
+            {
+                dataToRender.Add(chunkData);
+            }
+        }
+
+        try
+        {
+            meshDataDictionary = await CreateMeshDataAsync(dataToRender);
+        }
+        catch (Exception)
+        {
+            Debug.Log("Task canceled");
+            return;
+        }
+
+        StartCoroutine(ChunkCreationCoroutine(meshDataDictionary));
+
+        // Set world created flag if needed
+        if (IsWorldCreated == false)
+        {
+            IsWorldCreated = true;
+            OnWorldCreated?.Invoke();
+        }
+    }
     public void OnDisable()
 	{
 		taskTokenSource.Cancel();
@@ -357,7 +393,7 @@ public class World : MonoBehaviour
 
 
 }
-public struct WorldData
+public class WorldData
 {
 	public Dictionary<Vector3Int, ChunkData> chunkDataDictionary;
 	public Dictionary<Vector3Int, ChunkRenderer> chunkDictionary;
