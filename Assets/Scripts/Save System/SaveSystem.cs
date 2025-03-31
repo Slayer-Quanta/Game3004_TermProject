@@ -8,6 +8,7 @@ public class SaveData
 {
     public Vector3 playerPosition;
     public ChunkEntry[] worldChunksArray; // Changed to array for serialization
+    public int worldSeed; // Added to store the world seed
 }
 
 [System.Serializable]
@@ -52,7 +53,8 @@ public class SaveSystem : MonoBehaviour
         SaveData data = new SaveData
         {
             playerPosition = playerPosition,
-            worldChunksArray = chunkEntries.ToArray()
+            worldChunksArray = chunkEntries.ToArray(),
+            worldSeed = world.worldSeed // Save the current world seed
         };
 
         string json = JsonUtility.ToJson(data, true);
@@ -60,12 +62,13 @@ public class SaveSystem : MonoBehaviour
 
         File.WriteAllText(loadFlagPath, "true");
 
-        Debug.Log("Game Saved: " + savePath);
+        Debug.Log($"Game Saved: {savePath} with seed: {world.worldSeed}");
     }
 
-    public static bool LoadGame(World world, out Vector3? playerPosition)
+    public static bool LoadGame(World world, out Vector3? playerPosition, out int worldSeed)
     {
         playerPosition = null;
+        worldSeed = 0;
 
         if (!File.Exists(savePath))
         {
@@ -85,6 +88,7 @@ public class SaveSystem : MonoBehaviour
             SaveData data = JsonUtility.FromJson<SaveData>(json);
 
             playerPosition = data.playerPosition;
+            worldSeed = data.worldSeed; // Load the saved world seed
 
             // Clear existing world data
             world.worldData.chunkDataDictionary.Clear();
@@ -106,7 +110,7 @@ public class SaveSystem : MonoBehaviour
             Vector3Int playerChunkPos = Vector3Int.FloorToInt(data.playerPosition);
             world.RegenerateWorldFromSaveData(playerChunkPos);
 
-            Debug.Log("Game Loaded Successfully!");
+            Debug.Log($"Game Loaded Successfully with seed: {worldSeed}!");
             return true;
         }
         catch (Exception e)

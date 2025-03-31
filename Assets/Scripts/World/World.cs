@@ -10,27 +10,35 @@ using UnityEngine.Events;
 
 public class World : MonoBehaviour
 {
-	public static World self;
+    public static World self;
 
-	public int mapSizeInChunks = 6;
-	public int chunkSize = 16, chunkHeight = 100;
-	public int chunkDrawingRange = 8;
+    public int mapSizeInChunks = 6;
+    public int chunkSize = 16, chunkHeight = 100;
+    public int chunkDrawingRange = 8;
 
-	public GameObject chunkPrefab;
-	public WorldRenderer worldRenderer;
+    public GameObject chunkPrefab;
+    public WorldRenderer worldRenderer;
 
-	public TerrainGenerator terrainGenerator;
-	public Vector2Int mapSeedOffset;
+    public TerrainGenerator terrainGenerator;
+    public Vector2Int mapSeedOffset;
     public GameObject Menu;
     public GameObject minimapborder;
 
+    // World seed for terrain generation
+    [HideInInspector]
+    public int worldSeed;
+    //// Seed related settings
+    //[SerializeField]
+    //private bool useRandomSeed = true;
+    //[SerializeField]
+    //private int customSeed = 0;
+
     CancellationTokenSource taskTokenSource = new CancellationTokenSource();
 
+    //public Dictionary<Vector3Int, ChunkData> chunkDataDictionary = new Dictionary<Vector3Int, ChunkData>();
+    //public Dictionary<Vector3Int, ChunkRenderer> chunkDictionary = new Dictionary<Vector3Int, ChunkRenderer>();
 
-	//public Dictionary<Vector3Int, ChunkData> chunkDataDictionary = new Dictionary<Vector3Int, ChunkData>();
-	//public Dictionary<Vector3Int, ChunkRenderer> chunkDictionary = new Dictionary<Vector3Int, ChunkRenderer>();
-
-	public UnityEvent OnWorldCreated, OnNewChunksGenerated;
+    public UnityEvent OnWorldCreated, OnNewChunksGenerated;
 
     public WorldData worldData { get; set; } 
 
@@ -62,82 +70,106 @@ public class World : MonoBehaviour
         if (Menu != null) Menu.SetActive(false);
         if (minimapborder != null) minimapborder.SetActive(true);
     }
+    private void InitializeSeed()
+    {
+        // Always generate a new random seed
+        worldSeed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
 
+        // Use the seed to initialize the random number generator
+        UnityEngine.Random.InitState(worldSeed);
+
+        // Set the mapSeedOffset based on the seed
+        mapSeedOffset = new Vector2Int(
+            worldSeed % 10000,
+            (worldSeed / 10000) % 10000
+        );
+
+        Debug.Log($"World initialized with seed: {worldSeed}");
+    }
     public async void GenerateWorld()
     {
         if (SaveSystem.ShouldLoadGame())
         {
             Vector3? loadedPosition = null;
-            if (SaveSystem.LoadGame(this, out loadedPosition) && loadedPosition.HasValue)
+            int loadedSeed = 0;
+            if (SaveSystem.LoadGame(this, out loadedPosition, out loadedSeed) && loadedPosition.HasValue)
             {
-                Debug.Log("Loaded existing world.");
-                return; 
+                worldSeed = loadedSeed;
+
+                // Set the mapSeedOffset based on the loaded seed
+                mapSeedOffset = new Vector2Int(
+                    worldSeed % 10000,
+                    (worldSeed / 10000) % 10000
+                );
+
+                Debug.Log($"Loaded existing world with seed: {worldSeed}");
+                return;
             }
         }
 
+        // If we're not loading a game, initialize a new seed
+        InitializeSeed();
         await GenerateWorld(Vector3Int.zero);
     }
 
     private async Task GenerateWorld(Vector3Int position)
-	{
-		terrainGenerator.GenerateBiomePoints(position, chunkDrawingRange, chunkSize, mapSeedOffset);
+    {
+        // The rest of your GenerateWorld method remains mostly the same
+        terrainGenerator.GenerateBiomePoints(position, chunkDrawingRange, chunkSize, mapSeedOffset);
 
-		WorldGenerationData worldGenerationData = await Task.Run(() => GetPositionsThatPlayerSees(position), taskTokenSource.Token);
+        WorldGenerationData worldGenerationData = await Task.Run(() => GetPositionsThatPlayerSees(position), taskTokenSource.Token);
 
-		foreach (Vector3Int pos in worldGenerationData.chunkPositionsToRemove)
-		{
-			WorldDataHelper.RemoveChunk(this, pos);
-		}
+        foreach (Vector3Int pos in worldGenerationData.chunkPositionsToRemove)
+        {
+            WorldDataHelper.RemoveChunk(this, pos);
+        }
 
-		foreach (Vector3Int pos in worldGenerationData.chunkDataToRemove)
-		{
-			WorldDataHelper.RemoveChunkData(this, pos);
-		}
+        foreach (Vector3Int pos in worldGenerationData.chunkDataToRemove)
+        {
+            WorldDataHelper.RemoveChunkData(this, pos);
+        }
 
+        ConcurrentDictionary<Vector3Int, ChunkData> dataDictionary = null;
 
-		ConcurrentDictionary<Vector3Int, ChunkData> dataDictionary = null;
+        try
+        {
+            dataDictionary = await CalculateWorldChunkData(worldGenerationData.chunkDataPositionsToCreate);
+        }
+        catch (Exception)
+        {
+            Debug.Log("Task canceled");
+            return;
+        }
 
-		try
-		{
-			dataDictionary = await CalculateWorldChunkData(worldGenerationData.chunkDataPositionsToCreate);
-		}
-		catch (Exception)
-		{
-			Debug.Log("Task canceled");
-			return;
-		}
+        foreach (var calculatedData in dataDictionary)
+        {
+            worldData.chunkDataDictionary.Add(calculatedData.Key, calculatedData.Value);
+        }
+        foreach (var chunkData in worldData.chunkDataDictionary.Values)
+        {
+            AddTreeLeafs(chunkData);
+        }
 
+        ConcurrentDictionary<Vector3Int, MeshData> meshDataDictionary = new ConcurrentDictionary<Vector3Int, MeshData>();
 
-		foreach (var calculatedData in dataDictionary)
-		{
-			worldData.chunkDataDictionary.Add(calculatedData.Key, calculatedData.Value);
-		}
-		foreach (var chunkData in worldData.chunkDataDictionary.Values)
-		{
-			AddTreeLeafs(chunkData);
-		}
+        List<ChunkData> dataToRender = worldData.chunkDataDictionary
+            .Where(keyvaluepair => worldGenerationData.chunkPositionsToCreate.Contains(keyvaluepair.Key))
+            .Select(keyvalpair => keyvalpair.Value)
+            .ToList();
 
-		ConcurrentDictionary<Vector3Int, MeshData> meshDataDictionary = new ConcurrentDictionary<Vector3Int, MeshData>();
+        try
+        {
+            meshDataDictionary = await CreateMeshDataAsync(dataToRender);
+        }
+        catch (Exception)
+        {
+            Debug.Log("Task canceled");
+            return;
+        }
 
-		List<ChunkData> dataToRender = worldData.chunkDataDictionary
-			.Where(keyvaluepair => worldGenerationData.chunkPositionsToCreate.Contains(keyvaluepair.Key))
-			.Select(keyvalpair => keyvalpair.Value)
-			.ToList();
-
-		try
-		{
-			meshDataDictionary = await CreateMeshDataAsync(dataToRender);
-		}
-		catch (Exception)
-		{
-			Debug.Log("Task canceled");
-			return;
-		}
-
-		StartCoroutine(ChunkCreationCoroutine(meshDataDictionary));
-	}
-
-	private void AddTreeLeafs(ChunkData chunkData)
+        StartCoroutine(ChunkCreationCoroutine(meshDataDictionary));
+    }
+    private void AddTreeLeafs(ChunkData chunkData)
 	{
 		foreach (var treeLeafes in chunkData.treeData.treeLeafesSolid)
 		{

@@ -277,7 +277,7 @@ MonoBehaviour:
   detectionTime: 1
   camera_VM: {fileID: 742801425}
   cameraBrain: {fileID: 711989582}
-  enemyPrefab: {fileID: 6866045530827973093, guid: 3ebe46516f555494ebc5b6a3ac6069a5, type: 3}
+  enemyPrefab: {fileID: 1665735673906192485, guid: 8d3eebbe79769444aa887026b29a59bc, type: 3}
   enemyCount: 10
   enemySpawnRangeX: {x: -100, y: 100}
   enemySpawnRangeY: {x: -100, y: 100}
@@ -6684,6 +6684,7 @@ MonoBehaviour:
   mapSeedOffset: {x: 0, y: 0}
   Menu: {fileID: 589777317}
   minimapborder: {fileID: 1253828166}
+  worldSeed: 0
   OnWorldCreated:
     m_PersistentCalls:
       m_Calls:
@@ -7037,8 +7038,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c49737089c89ad428963e4e639598b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerCharacter: {fileID: 0}
   healthBar: {fileID: 887027784}
-  healthAmount: 100
+  damageOverlay: {fileID: 0}
+  healthText: {fileID: 0}
+  overlayDuration: 0.5
+  overlayMaxAlpha: 0.5
 --- !u!114 &1849150327
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0574cde1936ed0b47a27469ede9bf072
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 314903
+  packageName: Stylized Zombie Model + Animations
+  packageVersion: 1.0
+  assetPath: Assets/Zombie/Built-In/Prefabs/ZombieMesh.prefab
+  uploadId: 744240

@@ -34,8 +34,8 @@ public class PlayerCamera : MonoBehaviour
         // Handle touch input for camera rotation
         HandleTouchInput();
 
-        // Handle joystick/mouse input when touch is not active
-        if (!isUsingTouch)
+        // Handle mouse input when touch is not active and on non-mobile platforms
+        if (!isUsingTouch && !Application.isMobilePlatform)
         {
             float mouseX = playerInput.MousePosition.x * sensitivity * Time.deltaTime;
             float mouseY = playerInput.MousePosition.y * sensitivity * Time.deltaTime;
@@ -52,44 +52,38 @@ public class PlayerCamera : MonoBehaviour
     {
         if (Input.touchCount > 0)
         {
-            Touch touch = Input.GetTouch(0);
-
-            if (touch.position.x > Screen.width * 0.5f)
+            // Looking is controlled by touching the right half of the screen
+            for (int i = 0; i < Input.touchCount; i++)
             {
-                if (touch.phase == TouchPhase.Began)
+                Touch touch = Input.GetTouch(i);
+
+                // Only use touch on the right side for camera control
+                if (touch.position.x > Screen.width * 0.5f)
                 {
-                    isUsingTouch = true;
-                    lastTouchPosition = touch.position;
-                }
-                else if (touch.phase == TouchPhase.Moved && isUsingTouch)
-                {
-                    // Calculate touch delta with smooth dampening
-                    Vector2 touchDelta = touch.position - lastTouchPosition;
-                    smoothedDelta = Vector2.Lerp(smoothedDelta, touchDelta, Time.deltaTime * smoothing);
-                    lastTouchPosition = touch.position;
+                    if (touch.phase == TouchPhase.Began)
+                    {
+                        isUsingTouch = true;
+                        lastTouchPosition = touch.position;
+                    }
+                    else if (touch.phase == TouchPhase.Moved && isUsingTouch)
+                    {
+                        Vector2 touchDelta = touch.position - lastTouchPosition;
+                        smoothedDelta = Vector2.Lerp(smoothedDelta, touchDelta, Time.deltaTime * smoothing);
+                        lastTouchPosition = touch.position;
 
-                    // Apply horizontal rotation to player body
-                    float horizontalRotation = smoothedDelta.x * mobileSensitivity;
-                    playerBody.Rotate(Vector3.up * horizontalRotation);
+                        float horizontalRotation = smoothedDelta.x * mobileSensitivity;
+                        playerBody.Rotate(Vector3.up * horizontalRotation);
 
-                    // Apply vertical rotation to camera
-                    float verticalRotation = -smoothedDelta.y * mobileSensitivity;
-                    float newXRotation = transform.localEulerAngles.x + verticalRotation;
-
-                    // Convert to -180 to 180 range for proper clamping
-                    if (newXRotation > 180)
-                        newXRotation -= 360;
-
-                    // Clamp vertical rotation
-                    newXRotation = Mathf.Clamp(newXRotation, minVerticalAngle, maxVerticalAngle);
-
-                    // Apply rotation
-                    transform.localRotation = Quaternion.Euler(newXRotation, 0, 0);
-                }
-                else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
-                {
-                    isUsingTouch = false;
-                    smoothedDelta = Vector2.zero;
+                        float verticalRotationChange = -smoothedDelta.y * mobileSensitivity;
+                        verticalRotation = Mathf.Clamp(verticalRotation + verticalRotationChange, minVerticalAngle, maxVerticalAngle);
+                        transform.localRotation = Quaternion.Euler(verticalRotation, 0, 0);
+                    }
+                    else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                    {
+                        isUsingTouch = false;
+                        smoothedDelta = Vector2.zero;
+                    }
+                    break; // Break after processing the first valid touch on the right side
                 }
             }
         }
@@ -111,7 +105,7 @@ public class PlayerCamera : MonoBehaviour
         else
         {
             Vector3 localPos = transform.localPosition;
-            localPos.y = 0.7f; 
+            localPos.y = 0.7f;
             transform.localPosition = Vector3.Lerp(transform.localPosition, localPos, Time.deltaTime * 5f);
         }
     }

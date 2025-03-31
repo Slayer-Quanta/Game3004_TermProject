@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Character : MonoBehaviour
 {
@@ -10,6 +11,15 @@ public class Character : MonoBehaviour
     [SerializeField] private PauseSystem pauseMenu;
     [SerializeField] private GameObject explosionPrefab;
     [SerializeField] private Transform headTransform;
+
+    [Header("Health System")]
+    [SerializeField] private float maxHealth = 100f;
+    [SerializeField] public float currentHealth;
+    [SerializeField] private Image healthBar;
+    [SerializeField] private float healthRegenRate = 5f;
+    [SerializeField] private float healthRegenDelay = 3f;
+    private float lastDamageTime;
+    private bool isDead = false;
 
     [Header("Interaction Settings")]
     public float interactionRayLength = 5;
@@ -22,14 +32,24 @@ public class Character : MonoBehaviour
     public World world;
 
     [Header("Block Interaction")]
-    [SerializeField] private float doubleClickThreshold = 0.5f;
-    private float lastClickTime = 0f;
-    private Vector3Int lastClickedBlockPos = Vector3Int.zero;
+    [SerializeField] private float holdTimeToDestroy = 3.0f; // Time required to hold for destroying blocks
+    private float blockInteractionTimer = 0f;
+    private bool isHoldingInteraction = false;
+    private RaycastHit currentHit;
+    private bool validHit = false;
 
     [Header("Head Movement")]
     [SerializeField] private float headTiltAmount = 5f;
     [SerializeField] private float headTiltSpeed = 3f;
     private float currentHeadTilt = 0f;
+
+    // Event for when player health changes
+    public delegate void HealthChangedHandler(float currentHealth, float maxHealth);
+    public event HealthChangedHandler OnHealthChanged;
+
+    // Event for when player dies
+    public delegate void PlayerDeathHandler();
+    public event PlayerDeathHandler OnPlayerDeath;
 
     private void Awake()
     {
@@ -39,9 +59,12 @@ public class Character : MonoBehaviour
         playerMovement = GetComponent<PlayerMovement>();
         world = FindObjectOfType<World>();
 
-        // If no specific head transform is assigned, use the camera transform
         if (headTransform == null)
             headTransform = mainCamera.transform;
+
+        // Initialize health
+        currentHealth = maxHealth;
+        lastDamageTime = -healthRegenDelay;
     }
 
     private void Start()
@@ -52,6 +75,9 @@ public class Character : MonoBehaviour
         pauseMenu = FindObjectOfType<PauseSystem>();
         playerInput.OnPause += pauseMenu.TogglePause;
         playerInput.OnInventoryToggle += ToggleInventory;
+
+        // Initialize health UI
+        UpdateHealthBar();
     }
 
     private void OnDestroy()
@@ -69,6 +95,9 @@ public class Character : MonoBehaviour
 
     void Update()
     {
+        if (isDead)
+            return;
+
         UpdateHeadTilt();
 
         if (fly)
@@ -79,6 +108,181 @@ public class Character : MonoBehaviour
         {
             HandleWalkMode();
         }
+
+        HandleHealthRegeneration();
+
+        // Handle touch-based block interaction on mobile
+        if (Application.isMobilePlatform)
+        {
+            HandleTouchBlockInteraction();
+        }
+    }
+
+    private void HandleTouchBlockInteraction()
+    {
+        // Check for touches on the left side of the screen for block interaction
+        bool foundBlockInteractionTouch = false;
+
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            Touch touch = Input.GetTouch(i);
+
+            // Only use left side of screen for block interaction
+            if (touch.position.x < Screen.width * 0.5f)
+            {
+                foundBlockInteractionTouch = true;
+
+                // Cast ray on first touch
+                if (touch.phase == TouchPhase.Began)
+                {
+                    Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
+                    validHit = Physics.Raycast(playerRay, out currentHit, interactionRayLength, groundMask);
+
+                    if (validHit)
+                    {
+                        isHoldingInteraction = true;
+                        blockInteractionTimer = 0f;
+                        // Play click sound
+                        AudioManager.instance.PlayButtonClick();
+                    }
+                }
+                // Hold processing
+                else if ((touch.phase == TouchPhase.Stationary || touch.phase == TouchPhase.Moved) && isHoldingInteraction && validHit)
+                {
+                    blockInteractionTimer += Time.deltaTime;
+
+                    // Destroy block after holding for the specified time
+                    if (blockInteractionTimer >= holdTimeToDestroy)
+                    {
+                        ModifyTerrain(currentHit);
+                        isHoldingInteraction = false;
+                        blockInteractionTimer = 0f;
+                    }
+                }
+                // End of touch - place block if it was a quick tap
+                else if (touch.phase == TouchPhase.Ended && isHoldingInteraction && validHit)
+                {
+                    // If held for less than the destroy time, place a block
+                    if (blockInteractionTimer < holdTimeToDestroy)
+                    {
+                        PlaceBlock(currentHit);
+                    }
+
+                    isHoldingInteraction = false;
+                    blockInteractionTimer = 0f;
+                }
+
+                break; // Process only one touch for block interaction
+            }
+        }
+
+        // Reset if no interaction touch found
+        if (!foundBlockInteractionTouch)
+        {
+            isHoldingInteraction = false;
+            blockInteractionTimer = 0f;
+        }
+    }
+
+    private void HandleHealthRegeneration()
+    {
+        // Check if enough time has passed since last damage
+        if (Time.time - lastDamageTime > healthRegenDelay && currentHealth < maxHealth)
+        {
+            Heal(healthRegenRate * Time.deltaTime);
+        }
+    }
+
+    public void TakeDamage(float damage)
+    {
+        if (isDead)
+            return;
+
+        currentHealth -= damage;
+        lastDamageTime = Time.time;
+
+        // Play hit animation/sound
+        //AudioManager.instance.PlaySFX("Player_Hit");
+
+        //// Apply visual feedback (camera shake, etc)
+        StartCoroutine(DamageEffect());
+
+        UpdateHealthBar();
+
+        // Invoke the health changed event
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    public void Heal(float healAmount)
+    {
+        if (isDead)
+            return;
+
+        currentHealth += healAmount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+        UpdateHealthBar();
+
+        // Invoke the health changed event
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
+    private void UpdateHealthBar()
+    {
+        if (healthBar != null)
+        {
+            healthBar.fillAmount = currentHealth / maxHealth;
+        }
+    }
+
+    private void Die()
+    {
+        isDead = true;
+
+        // Disable movement and interaction
+        playerMovement.enabled = false;
+        playerInput.enabled = false;
+
+        // Play death animation
+        //animator.SetTrigger("die");
+
+        //// Play death sound
+        //AudioManager.instance.PlaySFX("Player_Death");
+
+        // Invoke the death event
+        OnPlayerDeath?.Invoke();
+
+    }
+
+    IEnumerator DamageEffect()
+    {
+        // Simple camera shake
+        Vector3 originalPosition = mainCamera.transform.localPosition;
+        float elapsed = 0f;
+        float duration = 0.15f;
+        float magnitude = 0.1f;
+
+        while (elapsed < duration)
+        {
+            float x = Random.Range(-1f, 1f) * magnitude;
+            float y = Random.Range(-1f, 1f) * magnitude;
+
+            mainCamera.transform.localPosition = new Vector3(
+                originalPosition.x + x,
+                originalPosition.y + y,
+                originalPosition.z
+            );
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        mainCamera.transform.localPosition = originalPosition;
     }
 
     private void UpdateHeadTilt()
@@ -112,7 +316,6 @@ public class Character : MonoBehaviour
         animator.SetBool("isGrounded", false);
         animator.ResetTrigger("jump");
 
-        // Fly using the joystick movement and input for ascend/descend
         bool ascendInput = playerInput.IsJumping;
         bool descendInput = playerInput.RunningPressed;
         playerMovement.Fly(ascendInput, descendInput);
@@ -139,7 +342,6 @@ public class Character : MonoBehaviour
                 AudioManager.instance.PlayWalkSound();
         }
 
-        // Handle Gravity and Walking
         playerMovement.HandleGravity(playerInput.IsJumping);
         playerMovement.Walk(playerInput.RunningPressed);
     }
@@ -153,52 +355,47 @@ public class Character : MonoBehaviour
 
     private void HandleMouseClick()
     {
-        AudioManager.instance.PlayButtonClick();
-        Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
-        RaycastHit hit;
-
-        if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
+        // This is for non-mobile platforms only
+        if (!Application.isMobilePlatform)
         {
-            Vector3Int clickedBlockPos = new Vector3Int(
-                Mathf.RoundToInt(hit.point.x),
-                Mathf.RoundToInt(hit.point.y),
-                Mathf.RoundToInt(hit.point.z)
-            );
+            AudioManager.instance.PlayButtonClick();
+            Ray playerRay = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
+            RaycastHit hit;
 
-            if (Input.GetMouseButton(0)) // Left-click: Destroy block
+            if (Physics.Raycast(playerRay, out hit, interactionRayLength, groundMask))
             {
-                if (clickedBlockPos == lastClickedBlockPos && Time.time - lastClickTime <= doubleClickThreshold)
+                if (Input.GetMouseButton(0))
                 {
                     ModifyTerrain(hit);
                 }
-                else
+                else if (Input.GetMouseButton(1))
                 {
-                    lastClickedBlockPos = clickedBlockPos;
-                    lastClickTime = Time.time;
+                    PlaceBlock(hit);
                 }
             }
-            else if (Input.GetMouseButton(1)) // Right-click: Place block
-            {
-                BlockType lookedAtBlockType = GetLookedAtBlockType(hit);
-                BlockType blockToPlace = GetNextBlockType(lookedAtBlockType);
+        }
+    }
 
-                Vector3Int targetBlockPos = new Vector3Int(
-                    Mathf.FloorToInt(hit.point.x - hit.normal.x * 0.5f),
-                    Mathf.FloorToInt(hit.point.y - hit.normal.y * 0.5f),
-                    Mathf.FloorToInt(hit.point.z - hit.normal.z * 0.5f)
-                );
-                Vector3Int placeBlockPos = targetBlockPos + Vector3Int.RoundToInt(hit.normal);
+    private void PlaceBlock(RaycastHit hit)
+    {
+        BlockType lookedAtBlockType = GetLookedAtBlockType(hit);
+        BlockType blockToPlace = GetNextBlockType(lookedAtBlockType);
 
-                BlockType existingBlock = world.GetBlockFromChunkCoordinates(
-                    hit.collider.GetComponent<ChunkRenderer>().ChunkData,
-                    placeBlockPos.x, placeBlockPos.y, placeBlockPos.z
-                );
+        Vector3Int targetBlockPos = new Vector3Int(
+            Mathf.FloorToInt(hit.point.x - hit.normal.x * 0.5f),
+            Mathf.FloorToInt(hit.point.y - hit.normal.y * 0.5f),
+            Mathf.FloorToInt(hit.point.z - hit.normal.z * 0.5f)
+        );
+        Vector3Int placeBlockPos = targetBlockPos + Vector3Int.RoundToInt(hit.normal);
 
-                if (existingBlock == BlockType.Air || existingBlock == BlockType.Nothing)
-                {
-                    world.SetBlock(placeBlockPos, blockToPlace);
-                }
-            }
+        BlockType existingBlock = world.GetBlockFromChunkCoordinates(
+            hit.collider.GetComponent<ChunkRenderer>().ChunkData,
+            placeBlockPos.x, placeBlockPos.y, placeBlockPos.z
+        );
+
+        if (existingBlock == BlockType.Air || existingBlock == BlockType.Nothing)
+        {
+            world.SetBlock(placeBlockPos, blockToPlace);
         }
     }
 
@@ -247,5 +444,10 @@ public class Character : MonoBehaviour
             hit.collider.GetComponent<ChunkRenderer>().ChunkData,
             blockPos.x, blockPos.y, blockPos.z
         );
+    }
+
+    public bool IsInRangeOfEnemy(Transform enemyTransform, float attackRange)
+    {
+        return Vector3.Distance(transform.position, enemyTransform.position) <= attackRange;
     }
 }

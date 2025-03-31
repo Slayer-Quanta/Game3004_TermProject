@@ -59,8 +59,11 @@ public class GameManager : MonoBehaviour
 
             // Load the world first
             Vector3? savedPosition = null;
-            if (SaveSystem.LoadGame(world, out savedPosition))
+            int worldSeed; // Declare variable to store worldSeed
+            if (SaveSystem.LoadGame(world, out savedPosition, out worldSeed)) // Pass worldSeed
             {
+                world.worldSeed = worldSeed; // Ensure the loaded world uses the correct seed
+
                 // Wait for world to finish generating before spawning player
                 world.OnWorldCreated.AddListener(() => {
                     // Then spawn the player at the saved position
@@ -77,7 +80,7 @@ public class GameManager : MonoBehaviour
 
                     Debug.Log("Loaded saved position at: " + savedPosition.Value);
 
-                    // Important: Setup player and camera references after position is set
+                    // Setup player and camera references
                     SetupPlayerReferences();
 
                     // Rebuild the NavMesh for AI navigation
@@ -95,6 +98,7 @@ public class GameManager : MonoBehaviour
                 Debug.LogError("Failed to load game. Starting new game instead.");
                 StartNewGame();
             }
+
         }
         else
         {

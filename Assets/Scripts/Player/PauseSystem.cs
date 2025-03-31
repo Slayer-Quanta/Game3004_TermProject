@@ -28,7 +28,7 @@ public class PauseSystem : MonoBehaviour
         pauseMenuUI.SetActive(false);
         resumeButton.onClick.AddListener(ResumeGame);
         saveButton.onClick.AddListener(SaveGame);
-        loadButton.onClick.AddListener(LoadGame);
+        //loadButton.onClick.AddListener(LoadGame);
         quitButton.onClick.AddListener(QuitGame);
     }
 
@@ -56,24 +56,23 @@ public class PauseSystem : MonoBehaviour
         }
     }
 
-    // Modify the LoadGame method
-    public void LoadGame()
-    {
-        if (SaveSystem.ShouldLoadGame())
-        {
-            Debug.Log("Loading game...");
+    //public void LoadGame()
+    //{
+    //    if (SaveSystem.ShouldLoadGame())
+    //    {
+    //        Debug.Log("Loading game...");
 
-            // First resume the game to set timeScale to 1
-            ResumeGame();
+    //        // First resume the game to set timeScale to 1
+    //        ResumeGame();
 
-            // Then reload the scene
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
-        else
-        {
-            Debug.Log("No saved game found.");
-        }
-    }
+    //        // Then reload the scene
+    //        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    //    }
+    //    else
+    //    {
+    //        Debug.Log("No saved game found.");
+    //    }
+    //}
 
     // Ensure ResumeGame properly resets state
     public void ResumeGame()
