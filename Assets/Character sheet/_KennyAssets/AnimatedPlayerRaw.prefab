@@ -255,6 +255,7 @@ MonoBehaviour:
   mainCamera: {fileID: 0}
   playerInput: {fileID: 4196351109005602393}
   playerMovement: {fileID: 4027023925208676324}
+  pauseMenu: {fileID: 0}
   interactionRayLength: 5
   groundMask:
     serializedVersion: 2

@@ -4,10 +4,17 @@ using UnityEngine.EventSystems; // Add this for UI input handling
 
 public class PauseSystem : MonoBehaviour
 {
+    public static PauseSystem self;
+
     public Image healthBar;
     public GameObject healthBarCanvas;
     public GameObject pauseMenuUI;
     public Button resumeButton, saveButton, loadButton, quitButton;
+
+    private void Awake()
+    {
+        self = this;
+    }
 
     private void Start()
     {

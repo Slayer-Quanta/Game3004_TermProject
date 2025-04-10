@@ -5,7 +5,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "51906591af0e145a3d4bc0631c28da4eb3fc5a2e"
+      "hash": "145e7ffc7fc2355d98f03eb8cdb24e30542d1197"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -19,6 +19,15 @@
       "source": "registry",
       "dependencies": {
         "com.unity.profiling.core": "1.0.2"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.ai.navigation": {
+      "version": "2.0.6",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.ai": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
