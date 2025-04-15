@@ -44,7 +44,14 @@ public class GameManager : MonoBehaviour
                     return;
                 }
             }
+            else
+            {
+                // Show loading screen before starting a new game
+                if (LoadingScreen.Instance != null)
+                    LoadingScreen.Instance.ShowLoadingScreen();
 
+                StartNewGame();
+            }
             // Initialize worldData if needed
             if (world.worldData == null)
             {
@@ -121,14 +128,17 @@ public class GameManager : MonoBehaviour
             }
 
             // Enable player controls if they have a controller component
-            var playerController = player.GetComponent<PlayerMovement>(); 
+            var playerController = player.GetComponent<PlayerMovement>();
             if (playerController != null)
             {
                 playerController.enabled = true;
             }
+
+            // Make sure loading screen is hidden when player is ready
+            if (LoadingScreen.Instance != null)
+                LoadingScreen.Instance.HideLoadingScreen();
         }
     }
-
 
     private void OnDestroy()
     {

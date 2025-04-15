@@ -88,8 +88,13 @@ public class World : MonoBehaviour
     }
     public async void GenerateWorld()
     {
+        // Show loading screen
+        if (LoadingScreen.Instance != null)
+            LoadingScreen.Instance.ShowLoadingScreen();
+
         if (SaveSystem.ShouldLoadGame())
         {
+            // Your existing loading code
             Vector3? loadedPosition = null;
             int loadedSeed = 0;
             if (SaveSystem.LoadGame(this, out loadedPosition, out loadedSeed) && loadedPosition.HasValue)
@@ -103,6 +108,11 @@ public class World : MonoBehaviour
                 );
 
                 Debug.Log($"Loaded existing world with seed: {worldSeed}");
+
+                // Hide loading screen
+                if (LoadingScreen.Instance != null)
+                    LoadingScreen.Instance.HideLoadingScreen();
+
                 return;
             }
         }
@@ -112,12 +122,21 @@ public class World : MonoBehaviour
         await GenerateWorld(Vector3Int.zero);
     }
 
+    // Modify the GenerateWorld(Vector3Int) method to update loading progress:
     private async Task GenerateWorld(Vector3Int position)
     {
-        // The rest of your GenerateWorld method remains mostly the same
+        // Update loading progress - Terrain generation (25%)
+        if (LoadingScreen.Instance != null)
+            LoadingScreen.Instance.UpdateProgress(0.25f);
+
+        // The rest of your GenerateWorld method
         terrainGenerator.GenerateBiomePoints(position, chunkDrawingRange, chunkSize, mapSeedOffset);
 
         WorldGenerationData worldGenerationData = await Task.Run(() => GetPositionsThatPlayerSees(position), taskTokenSource.Token);
+
+        // Update loading progress - Chunk data (50%)
+        if (LoadingScreen.Instance != null)
+            LoadingScreen.Instance.UpdateProgress(0.5f);
 
         foreach (Vector3Int pos in worldGenerationData.chunkPositionsToRemove)
         {
@@ -138,8 +157,17 @@ public class World : MonoBehaviour
         catch (Exception)
         {
             Debug.Log("Task canceled");
+
+            // Hide loading screen if task is canceled
+            if (LoadingScreen.Instance != null)
+                LoadingScreen.Instance.HideLoadingScreen();
+
             return;
         }
+
+        // Update loading progress - Processing chunks (75%)
+        if (LoadingScreen.Instance != null)
+            LoadingScreen.Instance.UpdateProgress(0.75f);
 
         foreach (var calculatedData in dataDictionary)
         {
@@ -164,11 +192,21 @@ public class World : MonoBehaviour
         catch (Exception)
         {
             Debug.Log("Task canceled");
+
+            // Hide loading screen if task is canceled
+            if (LoadingScreen.Instance != null)
+                LoadingScreen.Instance.HideLoadingScreen();
+
             return;
         }
 
+        // Update loading progress - Final stages (90%)
+        if (LoadingScreen.Instance != null)
+            LoadingScreen.Instance.UpdateProgress(0.9f);
+
         StartCoroutine(ChunkCreationCoroutine(meshDataDictionary));
     }
+
     private void AddTreeLeafs(ChunkData chunkData)
 	{
 		foreach (var treeLeafes in chunkData.treeData.treeLeafesSolid)
@@ -222,56 +260,71 @@ public class World : MonoBehaviour
 
 	}
 
-	IEnumerator ChunkCreationCoroutine(ConcurrentDictionary<Vector3Int, MeshData> meshDataDictionary)
-	{
-		foreach (var item in meshDataDictionary)
-		{
-			CreateChunk(worldData, item.Key, item.Value);
-			yield return new WaitForEndOfFrame();
-		}
-		if (IsWorldCreated == false)
-		{
-			IsWorldCreated = true;
-			OnWorldCreated?.Invoke();
-		}
-	}
+    IEnumerator ChunkCreationCoroutine(ConcurrentDictionary<Vector3Int, MeshData> meshDataDictionary)
+    {
+        foreach (var item in meshDataDictionary)
+        {
+            CreateChunk(worldData, item.Key, item.Value);
+            yield return new WaitForEndOfFrame();
+        }
 
-	private void CreateChunk(WorldData worldData, Vector3Int position, MeshData meshData)
-	{
-		ChunkRenderer chunkRenderer = worldRenderer.RenderChunk(worldData, position, meshData);
-		worldData.chunkDictionary.Add(position, chunkRenderer);
+        // Update loading progress - Complete (100%)
+        if (LoadingScreen.Instance != null)
+        {
+            LoadingScreen.Instance.UpdateProgress(1.0f);
+            // Wait a brief moment at 100% before hiding
+            yield return new WaitForSeconds(0.5f);
+            LoadingScreen.Instance.HideLoadingScreen();
+        }
 
-	}
+        if (IsWorldCreated == false)
+        {
+            IsWorldCreated = true;
+            OnWorldCreated?.Invoke();
+        }
+    }
+    private void CreateChunk(WorldData worldData, Vector3Int position, MeshData meshData)
+    {
+        ChunkRenderer chunkRenderer = worldRenderer.RenderChunk(worldData, position, meshData);
+        worldData.chunkDictionary.Add(position, chunkRenderer);
 
-	internal bool SetBlock(RaycastHit hit, BlockType blockType)
-	{
-		ChunkRenderer chunk = hit.collider.GetComponent<ChunkRenderer>();
-		if (chunk == null)
-			return false;
+        // After a chunk is created or modified
+        chunkRenderer.UpdateChunk();
+        chunkRenderer.BuildNavMeshForChunk();
+    }
 
-		Vector3Int pos = GetBlockPos(hit);
+    internal bool SetBlock(RaycastHit hit, BlockType blockType)
+    {
+        ChunkRenderer chunk = hit.collider.GetComponent<ChunkRenderer>();
+        if (chunk == null)
+            return false;
 
-		WorldDataHelper.SetBlock(chunk.ChunkData.worldReference, pos, blockType);
-		chunk.ModifiedByThePlayer = true;
+        Vector3Int pos = GetBlockPos(hit);
 
-		if (Chunk.IsOnEdge(chunk.ChunkData, pos))
-		{
-			List<ChunkData> neighbourDataList = Chunk.GetEdgeNeighbourChunk(chunk.ChunkData, pos);
-			foreach (ChunkData neighbourData in neighbourDataList)
-			{
-				//neighbourData.modifiedByThePlayer = true;
-				ChunkRenderer chunkToUpdate = WorldDataHelper.GetChunk(neighbourData.worldReference, neighbourData.worldPosition);
-				if (chunkToUpdate != null)
-					chunkToUpdate.UpdateChunk();
-			}
+        WorldDataHelper.SetBlock(chunk.ChunkData.worldReference, pos, blockType);
+        chunk.ModifiedByThePlayer = true;
 
-		}
+        if (Chunk.IsOnEdge(chunk.ChunkData, pos))
+        {
+            List<ChunkData> neighbourDataList = Chunk.GetEdgeNeighbourChunk(chunk.ChunkData, pos);
+            foreach (ChunkData neighbourData in neighbourDataList)
+            {
+                //neighbourData.modifiedByThePlayer = true;
+                ChunkRenderer chunkToUpdate = WorldDataHelper.GetChunk(neighbourData.worldReference, neighbourData.worldPosition);
+                if (chunkToUpdate != null)
+                {
+                    chunkToUpdate.UpdateChunk();
+                    chunkToUpdate.BuildNavMeshForChunk(); // Add here for neighbor chunks
+                }
+            }
+        }
 
-		chunk.UpdateChunk();
-		return true;
-	}
+        chunk.UpdateChunk();
+        chunk.BuildNavMeshForChunk(); // Add here for the modified chunk
+        return true;
+    }
 
-	private Vector3Int GetBlockPos(RaycastHit hit)
+    private Vector3Int GetBlockPos(RaycastHit hit)
 	{
 		Vector3 pos = new Vector3(
 			 GetBlockPositionIn(hit.point.x, hit.normal.x),
@@ -309,6 +362,7 @@ public class World : MonoBehaviour
             {
                 chunkRenderer.ModifiedByThePlayer = true;
                 chunkRenderer.UpdateChunk();
+                chunkRenderer.BuildNavMeshForChunk();
             }
 
             return true;
@@ -316,7 +370,6 @@ public class World : MonoBehaviour
 
         return false;
     }
-
 
     private WorldGenerationData GetPositionsThatPlayerSees(Vector3Int playerPosition)
 	{
@@ -409,6 +462,7 @@ public class World : MonoBehaviour
             OnWorldCreated?.Invoke();
         }
     }
+
     public void OnDisable()
 	{
 		taskTokenSource.Cancel();

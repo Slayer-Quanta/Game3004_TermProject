@@ -277,6 +277,7 @@ MonoBehaviour:
   detectionTime: 1
   camera_VM: {fileID: 742801425}
   cameraBrain: {fileID: 711989582}
+  autoSaveInterval: 300
   enemyPrefab: {fileID: 1665735673906192485, guid: 8d3eebbe79769444aa887026b29a59bc, type: 3}
   enemyCount: 10
   enemySpawnRangeX: {x: -100, y: 100}

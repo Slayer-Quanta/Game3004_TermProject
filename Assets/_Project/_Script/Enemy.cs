@@ -17,6 +17,13 @@ public class Enemy : MonoBehaviour
     public float detectionRadius = 15f;
     public float attackRange = 1.5f;
 
+    // Cache squared distances for faster comparisons
+    private float sqrDetectionRadius;
+    private float sqrAttackRange;
+    // Reuse path object instead of creating new ones
+    private NavMeshPath cachedPath;
+    private float nextPathUpdateTime;
+
     [Header("Attack")]
     public float attackDamage = 10f;
     public float attackCooldown = 1.5f;
@@ -53,7 +60,15 @@ public class Enemy : MonoBehaviour
         enemyCollider = GetComponent<Collider>();
         enemyRigidbody = GetComponent<Rigidbody>();
 
-        InvokeRepeating(nameof(UpdatePlayerDetection), 0, updateRate);
+        // Cache squared values to avoid expensive sqrt operations
+        sqrDetectionRadius = detectionRadius * detectionRadius;
+        sqrAttackRange = attackRange * attackRange;
+
+        // Create path object once
+        cachedPath = new NavMeshPath();
+
+        // Use timer in Update instead of InvokeRepeating
+        nextPathUpdateTime = 0f;
     }
 
     private void Awake()
@@ -74,43 +89,50 @@ public class Enemy : MonoBehaviour
             animator.SetFloat(SpeedParam, agent.velocity.magnitude / agent.speed);
         }
 
-        // Check if player is in attack range
+        // Check if player exists and if we should update path
         if (player != null)
         {
-            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-            playerInRange = distanceToPlayer <= attackRange;
+            // Calculate distance only once per frame
+            Vector3 directionToPlayer = player.position - transform.position;
+            float sqrDistanceToPlayer = directionToPlayer.sqrMagnitude;
 
+            // Check attack range using squared distance (faster)
+            playerInRange = sqrDistanceToPlayer <= sqrAttackRange;
+
+            // Attack if in range and cooldown elapsed
             if (playerInRange && Time.time >= nextAttackTime)
             {
                 AttackPlayer();
             }
+
+            // Update path at specified intervals rather than using InvokeRepeating
+            if (Time.time >= nextPathUpdateTime)
+            {
+                UpdatePlayerDetection(sqrDistanceToPlayer);
+                nextPathUpdateTime = Time.time + updateRate;
+            }
         }
     }
 
-    private void UpdatePlayerDetection()
+    private void UpdatePlayerDetection(float sqrDistanceToPlayer)
     {
         if (isDead || player == null)
             return;
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
         // Only chase player if within detection radius
-        if (distanceToPlayer <= detectionRadius)
+        if (sqrDistanceToPlayer <= sqrDetectionRadius)
         {
-            // Set destination to player position
-            agent.SetDestination(player.position);
+            // Use the cached path object instead of creating a new one
+            agent.CalculatePath(player.position, cachedPath);
 
-            // Check if path is possible
-            if (agent.pathStatus == NavMeshPathStatus.PathPartial || agent.pathStatus == NavMeshPathStatus.PathInvalid)
+            if (cachedPath.status == NavMeshPathStatus.PathComplete)
             {
-                // Path is not valid, try to find an alternative
-                NavMeshPath path = new NavMeshPath();
-                agent.CalculatePath(player.position, path);
-                if (path.status != NavMeshPathStatus.PathComplete)
-                {
-                    // No valid path to player
-                    agent.ResetPath();
-                }
+                agent.SetPath(cachedPath);
+            }
+            else
+            {
+                // No valid path to player
+                agent.ResetPath();
             }
         }
         else
@@ -141,25 +163,21 @@ public class Enemy : MonoBehaviour
 
         if (playerCharacter != null && playerInRange && !isDead)
         {
-            // Double-check if player is still in range
-            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-            if (distanceToPlayer <= attackRange)
+            // Use cached playerInRange value instead of recalculating distance
+            // Apply damage to player
+            playerCharacter.TakeDamage(attackDamage);
+
+            // Play attack effect
+            if (attackEffectPrefab != null)
             {
-                // Apply damage to player
-                playerCharacter.TakeDamage(attackDamage);
-
-                // Play attack effect
-                if (attackEffectPrefab != null)
-                {
-                    Vector3 effectPosition = player.position;
-                    effectPosition.y += 1f; // Offset to hit body
-                    GameObject effect = Instantiate(attackEffectPrefab, effectPosition, Quaternion.identity);
-                    Destroy(effect, 2f);
-                }
-
-                // Play attack sound
-                AudioManager.instance.PlaySFX("Enemy_Attack");
+                Vector3 effectPosition = player.position;
+                effectPosition.y += 1f; // Offset to hit body
+                GameObject effect = Instantiate(attackEffectPrefab, effectPosition, Quaternion.identity);
+                Destroy(effect, 2f);
             }
+
+            // Play attack sound
+            AudioManager.instance.PlaySFX("Enemy_Attack");
         }
     }
 

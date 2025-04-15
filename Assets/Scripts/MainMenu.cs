@@ -1,3 +1,4 @@
+using System.Collections;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -20,7 +21,44 @@ public class MainMenu : MonoBehaviour
     {
         SaveSystem.DeleteSave();  // Clear any previous save file to start fresh
         AudioManager.instance.PlayButtonClick();
-        SceneManager.LoadSceneAsync(4);  // Load your game scene
+
+        // Show loading screen before loading the scene
+        LoadingScreen.Instance.ShowLoadingScreen();
+
+        // Load the scene asynchronously
+        StartCoroutine(LoadGameSceneAsync(4));
+    }
+
+    private IEnumerator LoadGameSceneAsync(int sceneIndex)
+    {
+        // Begin loading the scene
+        AsyncOperation operation = SceneManager.LoadSceneAsync(sceneIndex);
+
+        // Don't let the scene activate until we allow it
+        operation.allowSceneActivation = false;
+
+        // While the scene loads
+        while (!operation.isDone)
+        {
+            // Update the progress bar (normalized progress goes from 0 to 0.9)
+            float progress = Mathf.Clamp01(operation.progress / 0.9f);
+            LoadingScreen.Instance.UpdateProgress(progress);
+
+            // If the load has finished
+            if (operation.progress >= 0.9f)
+            {
+                // Wait for a short delay to show the last loading message
+                yield return new WaitForSeconds(1f);
+
+                // Activate the scene
+                operation.allowSceneActivation = true;
+            }
+
+            yield return null;
+        }
+
+        // Hide loading screen when done (though likely won't be seen as we're changing scenes)
+        LoadingScreen.Instance.HideLoadingScreen();
     }
 
     public void LoadGame()
@@ -28,14 +66,18 @@ public class MainMenu : MonoBehaviour
         if (SaveSystem.ShouldLoadGame())
         {
             AudioManager.instance.PlayButtonClick();
-            SceneManager.LoadSceneAsync(4);  // Load the saved game
+
+            // Show loading screen before loading the scene
+            LoadingScreen.Instance.ShowLoadingScreen();
+
+            // Load the scene asynchronously
+            StartCoroutine(LoadGameSceneAsync(4));
         }
         else
         {
             Debug.Log("No saved game found.");
         }
     }
-
     public void ToggleWorldCreationCanvas()
     {
         bool isActive = worldCreationCanvas.activeSelf;

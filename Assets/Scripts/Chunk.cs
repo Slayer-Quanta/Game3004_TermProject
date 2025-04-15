@@ -69,7 +69,7 @@ public static class Chunk
 		}
 	}
 
-	private static int GetIndexFromPosition(ChunkData chunkData, int x, int y, int z)
+	public static int GetIndexFromPosition(ChunkData chunkData, int x, int y, int z)
 	{
 		return x + chunkData.chunkSize * y + chunkData.chunkSize * chunkData.chunkHeight * z;
 	}
@@ -84,17 +84,69 @@ public static class Chunk
 		};
 	}
 
-	public static MeshData GetChunkMeshData(ChunkData chunkData)
-	{
-		MeshData meshData = new MeshData(true);
+    public static MeshData GetChunkMeshData(ChunkData chunkData)
+    {
+        MeshData meshData = new MeshData(true);
 
-		LoopThroughTheBlocks(chunkData, (x, y, z) => meshData = BlockHelper.GetMeshData(chunkData, x, y, z, meshData, chunkData.blocks[GetIndexFromPosition(chunkData, x, y, z)]));
+        LoopThroughTheBlocks(chunkData, (x, y, z) => {
+            var blockType = chunkData.blocks[GetIndexFromPosition(chunkData, x, y, z)];
+            // Skip water blocks or other non-navigable blocks for NavMesh
+            if (blockType != BlockType.Water && blockType != BlockType.Nothing)
+            {
+                meshData = BlockHelper.GetMeshData(chunkData, x, y, z, meshData, blockType);
+            }
+        });
 
+        // Validate the mesh data
+        ValidateMeshData(meshData);
 
-		return meshData;
-	}
+        return meshData;
+    }
 
-	internal static Vector3Int ChunkPositionFromBlockCoords(World world, int x, int y, int z)
+    private static void ValidateMeshData(MeshData meshData)
+    {
+        // Remove duplicate vertices
+        Dictionary<Vector3, int> uniqueVertices = new Dictionary<Vector3, int>();
+        List<Vector3> newVertices = new List<Vector3>();
+        List<int> vertexRemapping = new List<int>();
+
+        for (int i = 0; i < meshData.colliderVertices.Count; i++)
+        {
+            Vector3 vertex = meshData.colliderVertices[i];
+
+            // Check for NaN values
+            if (float.IsNaN(vertex.x) || float.IsNaN(vertex.y) || float.IsNaN(vertex.z))
+            {
+                // Replace with a valid vertex to avoid errors
+                vertex = Vector3.zero;
+            }
+
+            if (!uniqueVertices.TryGetValue(vertex, out int index))
+            {
+                // New unique vertex
+                uniqueVertices[vertex] = newVertices.Count;
+                vertexRemapping.Add(newVertices.Count);
+                newVertices.Add(vertex);
+            }
+            else
+            {
+                // Duplicate vertex
+                vertexRemapping.Add(index);
+            }
+        }
+
+        // Update triangles to use new vertex indices
+        List<int> newTriangles = new List<int>();
+        for (int i = 0; i < meshData.colliderTriangles.Count; i++)
+        {
+            newTriangles.Add(vertexRemapping[meshData.colliderTriangles[i]]);
+        }
+
+        meshData.colliderVertices = newVertices;
+        meshData.colliderTriangles = newTriangles;
+    }
+
+    internal static Vector3Int ChunkPositionFromBlockCoords(World world, int x, int y, int z)
 	{
 		Vector3Int pos = new Vector3Int
 		{
