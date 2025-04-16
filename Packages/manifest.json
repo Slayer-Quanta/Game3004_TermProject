@@ -2,6 +2,8 @@
   "dependencies": {
     "com.lufias.helper": "https://github.com/lufias-69/helper-unity.git",
     "com.unity.2d.sprite": "1.0.0",
+    "com.unity.adaptiveperformance.google.android": "5.1.2",
+    "com.unity.adaptiveperformance.samsung.android": "5.0.0",
     "com.unity.ai.navigation": "2.0.6",
     "com.unity.cinemachine": "3.1.2",
     "com.unity.collab-proxy": "2.6.0",
