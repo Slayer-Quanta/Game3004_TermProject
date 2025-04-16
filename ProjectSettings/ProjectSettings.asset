@@ -145,6 +145,9 @@ PlayerSettings:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  - {fileID: 11400000, guid: 73fb6a979b43f134b897d2a4ef3f88da, type: 2}
+  - {fileID: 11400000, guid: 600220a57bed0b546b59b381a90af057, type: 2}
+  - {fileID: 3426151013344465371, guid: 8b1f30b78e2b5854c8520d82b76157b2, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -153,7 +156,7 @@ PlayerSettings:
   vrSettings:
     enable360StereoCapture: 0
   isWsaHolographicRemotingEnabled: 0
-  enableFrameTimingStats: 0
+  enableFrameTimingStats: 1
   enableOpenGLProfilerGPURecorders: 1
   allowHDRDisplaySupport: 0
   useHDRDisplay: 0
@@ -919,11 +922,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: 9a599529-d9c4-4aae-89bf-850196dfffca
+  cloudProjectId: 38a09b2b-2a83-49c4-9995-d18450b49087
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Shadowed Lands
-  organizationId: frostbyllzebub
+  projectName: Game3004_TermProject
+  organizationId: quanta_24
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
