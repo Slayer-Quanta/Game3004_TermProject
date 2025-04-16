@@ -18,7 +18,7 @@ public class UiInventoryItemSlot : MonoBehaviour,IDragHandler,IPointerClickHandl
         this.index = index;
         this.uiInventory = uiInventory;
         var inventoryItem = uiInventory.inventory.items[index];
-        if (inventoryItem.quantity == 0 || inventoryItem.ID == "")
+        if (inventoryItem.quantity == 0 || inventoryItem.ID == "" || inventoryItem.ID == null)
         {
             iconImage.gameObject.SetActive(false);
             quantityText.gameObject.SetActive(false);

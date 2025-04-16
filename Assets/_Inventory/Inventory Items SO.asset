@@ -15,26 +15,24 @@ MonoBehaviour:
   details:
   - name: Pickaxe
     icon: {fileID: 21300000, guid: db9ff517441838944a3d2a8a08b57122, type: 3}
-    prefab: {fileID: 0}
+    prefab: {fileID: 6200269953808212271, guid: d6190b16fa104b64183280acbe30bd2b, type: 3}
     maxStack: 1
     useRange: {x: 5, y: 5}
     description: 
     extra:
       itemType: 4
-      value: 0
       maxDurability: 16
       durabilityCostPerUse: 1
       useSound: {fileID: 0}
     ID: 
   - name: Dirt Block
     icon: {fileID: 21300000, guid: d9272968eef00924d9ca512ec3795150, type: 3}
-    prefab: {fileID: 0}
+    prefab: {fileID: 548121186484546993, guid: 14a719bd2e6c63c489c6d7cf86406a2d, type: 3}
     maxStack: 64
     useRange: {x: 5, y: 5}
     description: 
     extra:
       itemType: 5
-      value: 0
       maxDurability: 0
       durabilityCostPerUse: 0
       useSound: {fileID: 0}

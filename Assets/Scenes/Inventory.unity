@@ -564,6 +564,26 @@ PrefabInstance:
       propertyPath: playerItemHotbarUi
       value: 
       objectReference: {fileID: 1749843314}
+    - target: {fileID: 6280796335675704296, guid: 1bdaa6d0a7e403d49866a39fefa9c8fe, type: 3}
+      propertyPath: items.Array.data[0].ID
+      value: '#Pickaxe'
+      objectReference: {fileID: 0}
+    - target: {fileID: 6280796335675704296, guid: 1bdaa6d0a7e403d49866a39fefa9c8fe, type: 3}
+      propertyPath: items.Array.data[1].ID
+      value: '#Dirt Block'
+      objectReference: {fileID: 0}
+    - target: {fileID: 6280796335675704296, guid: 1bdaa6d0a7e403d49866a39fefa9c8fe, type: 3}
+      propertyPath: items.Array.data[0].quantity
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6280796335675704296, guid: 1bdaa6d0a7e403d49866a39fefa9c8fe, type: 3}
+      propertyPath: items.Array.data[1].quantity
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6280796335675704296, guid: 1bdaa6d0a7e403d49866a39fefa9c8fe, type: 3}
+      propertyPath: items.Array.data[0].durability
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 6348886967226296196, guid: 1bdaa6d0a7e403d49866a39fefa9c8fe, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -603,6 +623,14 @@ PrefabInstance:
     - target: {fileID: 6348886967226296196, guid: 1bdaa6d0a7e403d49866a39fefa9c8fe, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692809883720205663, guid: 1bdaa6d0a7e403d49866a39fefa9c8fe, type: 3}
+      propertyPath: inventoryUis.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692809883720205663, guid: 1bdaa6d0a7e403d49866a39fefa9c8fe, type: 3}
+      propertyPath: inventoryUis.Array.data[0].name
+      value: None
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -74,11 +74,12 @@ public class InventoryManager : MonoBehaviour
 
     public InventoryItemDetails GetItemDetails(string ID)
     {
+        if(ID == null || ID == "") { return null; }
         if (inventoryItemDetailsDictionary.TryGetValue(ID, out var itemDetails))
         {
             return itemDetails;
         }
-        Debug.LogWarning($"Item With ID: {ID} not found in inventory!");
+        Debug.LogError($"Item With ID: {ID} not found in inventory!");
         return null;
     }
 
@@ -147,6 +148,7 @@ public class InventoryManager : MonoBehaviour
         {
             if (currentlyOpenedInventoryType == UiInventory.UiInventoryType.PlayerHotbar)
             {
+                Cursor.lockState = CursorLockMode.None;
                 playerInventory.ShowPlayerInventory(true);
                 playerInventory.ShowPlayerHotbar(false);
                 currentlyOpenedInventoryType = UiInventory.UiInventoryType.PlayerInventory;
@@ -156,6 +158,7 @@ public class InventoryManager : MonoBehaviour
                 currentlyOpenedInventoryType = UiInventory.UiInventoryType.PlayerHotbar;
                 playerInventory.ShowPlayerInventory(false);
                 playerInventory.ShowPlayerHotbar(true);
+                Cursor.lockState = CursorLockMode.Locked;
             }
         }
         else
@@ -300,13 +303,20 @@ public class InventoryManager : MonoBehaviour
     public virtual void DropInventoryItem()
     {
         if (currentDraggedItem == null) return;
-
         var itemPrefab = GetItemDetails(currentDraggedItem.item.ID)?.prefab;
         if (itemPrefab != null)
         {
-            var dropItem = Instantiate(itemPrefab, itemDropTransform.position, Quaternion.identity, transform)
-                            .GetComponent<InventoryDroppedItem>();
-            dropItem.SetDroppedItem(currentDraggedItem.item);
+            Debug.Log("Drop Item");
+            if (itemDropTransform == null)
+            {
+                itemDropTransform = transform;
+            }
+            var dropItem = Instantiate(itemPrefab, itemDropTransform.position, Quaternion.identity, itemDropTransform);
+            if (dropItem.GetComponent<InventoryDroppedItem>() == null)
+            {
+                dropItem.AddComponent<InventoryDroppedItem>();
+            }
+            dropItem.GetComponent<InventoryDroppedItem>().SetDroppedItem(currentDraggedItem.item);
         }
         else
         {
@@ -316,10 +326,11 @@ public class InventoryManager : MonoBehaviour
         Destroy(currentDraggedItem.gameObject);
     }
 
-    public virtual void AddDroppedItem(InventoryDroppedItem droppedItem, InventoryItemPicker inventoryPicker)
+    public virtual void AddDroppedItem(InventoryDroppedItem droppedItem)
     {
+        Debug.Log("Try Add Droped Item");
         var droppedItemData = droppedItem.inventoryItem;
-        var inventoryItems = inventoryPicker.inventoryToAddItem.items;
+        var inventoryItems = playerInventory.items;
         var itemDetails = GetItemDetails(droppedItemData.ID);
 
         if (itemDetails == null) return;
@@ -335,17 +346,22 @@ public class InventoryManager : MonoBehaviour
                 if (remainingQuantity <= availableSpace)
                 {
                     inventoryItems[i].quantity += remainingQuantity;
+                    inventoryItems[i].ID = droppedItemData.ID;
                     Destroy(droppedItem.gameObject);
+                    playerInventory.playerInventoryUi.SetUiInventory(playerInventory);
+                    playerInventory.playerItemHotbarUi.SetUiInventory(playerInventory);
                     return;
                 }
                 else
                 {
+                    inventoryItems[i].ID = droppedItemData.ID;
                     inventoryItems[i].quantity = itemDetails.maxStack;
                     remainingQuantity -= availableSpace;
                 }
             }
         }
-
+        playerInventory.playerInventoryUi.SetUiInventory(playerInventory);
+        playerInventory.playerItemHotbarUi.SetUiInventory(playerInventory);
         droppedItem.SetDroppedItem(new InventoryItem(droppedItemData.ID, remainingQuantity, droppedItemData.durability));
     }
 }

@@ -46,11 +46,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   items:
-  - ID: 
-    quantity: 0
-    durability: 0
-  - ID: 
-    quantity: 0
+  - ID: '#Pickaxe'
+    quantity: 1
+    durability: 16
+  - ID: '#Dirt Block'
+    quantity: 20
     durability: 0
   - ID: 
     quantity: 0
@@ -109,14 +109,15 @@ MonoBehaviour:
   uiInventoryType: 0
   showHotbarOnStart: 1
   useMouseScrollToSelectItem: 1
+  playerInventoryOpenKey: 9
+  playerInventoryUi: {fileID: 0}
+  playerItemHotbarUi: {fileID: 0}
+  selectedItemIndex: 0
   selectedItem:
     ID: 
     quantity: 0
     durability: 0
-  selectedItemIndex: 0
-  playerInventoryOpenKey: 9
-  playerInventoryUi: {fileID: 0}
-  playerItemHotbarUi: {fileID: 0}
+  handHeldTransform: {fileID: 0}
 --- !u!114 &8692809883720205663
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -131,7 +132,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentlyOpenedInventoryType: 0
   uiDraggedItemPrefab: {fileID: 4509176395161670218, guid: 211d21dd2aedc8b49800111ebb642156, type: 3}
-  itemDropTransform: {fileID: 3333263102080765934, guid: 9a4bcbf2fe1d1a3449b3a6a9c296ef4f, type: 3}
+  itemDropTransform: {fileID: 0}
   inventoryItemSO: {fileID: 11400000, guid: 6b710ab6e5b7a1949b805dcfdd155c11, type: 2}
   inventoryUis: []
-  <currentlyOpenedInventory>k__BackingField: {fileID: 0}

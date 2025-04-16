@@ -12,6 +12,7 @@ public class PlayerInventory : Inventory
     [HideInInspector] public int selectedItemIndex;
     public InventoryItem selectedItem;
     public InventoryItemDetails selectedItemDetails;
+    public Transform handHeldTransform;
     private void Awake()
     {
         selectedItemIndex = -1;
@@ -53,11 +54,10 @@ public class PlayerInventory : Inventory
  
     public void SelectItem(int index)
     {
-        if (index != playerItemHotbarUi.slots.Length && items[index] == selectedItem)
+        if (index >= 0 && index != playerItemHotbarUi.slots.Length && items[index] == selectedItem)
         {
             selectedItem = null;
             selectedItemIndex = -1;
-            selectedItemDetails = null;
         }
         else
         {
@@ -74,20 +74,50 @@ public class PlayerInventory : Inventory
                 selectedItemIndex = index;
             }
             selectedItem = items[selectedItemIndex];
-            selectedItemDetails = InventoryManager.Singleton.GetItemDetails(selectedItem.ID);
         }
         foreach (var slot in playerItemHotbarUi.slots)
         {
             slot.SelectSlot(selectedItemIndex);
         }
+
+        if (selectedItem != null && selectedItem.ID != null && selectedItem.ID != "")
+        {
+            selectedItemDetails = InventoryManager.Singleton.GetItemDetails(selectedItem.ID);
+        }
+        else
+        {
+            selectedItemDetails = null;
+        }
+        if (handHeldTransform != null)
+        {
+            for (int c = 0; c < handHeldTransform.childCount; c++)
+            {
+                Destroy(handHeldTransform.GetChild(c).gameObject);
+            }
+            if (selectedItem != null && selectedItem.ID != null && selectedItem.ID != "")
+            {
+                GameObject itemPrefab = selectedItemDetails.prefab;
+                if (itemPrefab != null)
+                {
+                    GameObject handObj =  Instantiate(itemPrefab, handHeldTransform.position, Quaternion.identity, handHeldTransform);
+                    if (handObj.GetComponent<InventoryDroppedItem>())
+                    {
+                        Destroy(handObj.GetComponent<InventoryDroppedItem>());
+                        Destroy(handObj.GetComponent<Collider>());
+                    }
+                }
+            }
+        }
     }
     public void UseSelectedItem()
     {
+        
         if (selectedItem != null &&
             selectedItem.ID != null &&
             selectedItem.ID != "" &&
             selectedItem.quantity > 0)
         {
+            InventoryItemDetails selectedItemDetails = InventoryManager.Singleton.GetItemDetails(selectedItem.ID);
             if (selectedItemDetails.extra.maxDurability > 0)
             {
                 selectedItem.durability -= selectedItemDetails.extra.durabilityCostPerUse;
@@ -99,11 +129,12 @@ public class PlayerInventory : Inventory
                 }
             }
             InventoryManager.Singleton.RemoveItemFromInventory(this, selectedItemIndex, 1);
+            if (selectedItem.quantity <= 0)
+            {
+                selectedItem = null;
+            }
         }
-        if (selectedItem.quantity <= 0)
-        {
-            SelectItem();
-        }
+        
         playerInventoryUi.SetUiInventory(this);
         playerItemHotbarUi.SetUiInventory(this);
     }
