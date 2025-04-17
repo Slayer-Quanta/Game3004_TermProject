@@ -137,6 +137,7 @@ GameObject:
   - component: {fileID: 4196351109005602393}
   - component: {fileID: 4027023925208676324}
   - component: {fileID: 7040412690683803284}
+  - component: {fileID: 1027641911366535275}
   m_Layer: 0
   m_Name: AnimatedPlayerRaw
   m_TagString: Player
@@ -270,6 +271,11 @@ MonoBehaviour:
   pauseMenu: {fileID: 0}
   explosionPrefab: {fileID: 6813416509558619124, guid: 3b7f2c753d435d647a80f1f047a113e3, type: 3}
   headTransform: {fileID: 0}
+  maxHealth: 100
+  currentHealth: 0
+  healthBar: {fileID: 0}
+  healthRegenRate: 5
+  healthRegenDelay: 3
   interactionRayLength: 5
   groundMask:
     serializedVersion: 2
@@ -277,9 +283,21 @@ MonoBehaviour:
   fly: 0
   animator: {fileID: 116692707738079568}
   world: {fileID: 0}
-  doubleClickThreshold: 0.5
+  holdTimeToDestroy: 3
   headTiltAmount: 5
   headTiltSpeed: 3
+--- !u!114 &1027641911366535275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 116692708104115924}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2243a30f5abab0240b785e18d22fea50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &116692707728663600
 PrefabInstance:
   m_ObjectHideFlags: 0
