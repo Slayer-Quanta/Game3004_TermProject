@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -25,6 +24,7 @@ public class World : MonoBehaviour
     public GameObject Menu;
     public GameObject minimapborder;
 
+    // World seed for terrain generation
     [HideInInspector]
     public int worldSeed;
     //// Seed related settings
@@ -64,7 +64,9 @@ public class World : MonoBehaviour
 
     void Start()
     {
-        GenerateWorld();
+        GenerateWorld(); // Automatically generate the world at scene start.
+
+        // Disable the menu and enable the minimapborder
         if (Menu != null) Menu.SetActive(false);
         if (minimapborder != null) minimapborder.SetActive(true);
     }
@@ -92,12 +94,14 @@ public class World : MonoBehaviour
 
         if (SaveSystem.ShouldLoadGame())
         {
+            // Your existing loading code
             Vector3? loadedPosition = null;
             int loadedSeed = 0;
             if (SaveSystem.LoadGame(this, out loadedPosition, out loadedSeed) && loadedPosition.HasValue)
             {
                 worldSeed = loadedSeed;
 
+                // Set the mapSeedOffset based on the loaded seed
                 mapSeedOffset = new Vector2Int(
                     worldSeed % 10000,
                     (worldSeed / 10000) % 10000
@@ -105,6 +109,7 @@ public class World : MonoBehaviour
 
                 Debug.Log($"Loaded existing world with seed: {worldSeed}");
 
+                // Hide loading screen
                 if (LoadingScreen.Instance != null)
                     LoadingScreen.Instance.HideLoadingScreen();
 
@@ -112,10 +117,12 @@ public class World : MonoBehaviour
             }
         }
 
+        // If we're not loading a game, initialize a new seed
         InitializeSeed();
         await GenerateWorld(Vector3Int.zero);
     }
 
+    // Modify the GenerateWorld(Vector3Int) method to update loading progress:
     private async Task GenerateWorld(Vector3Int position)
     {
         // Update loading progress - Terrain generation (25%)
@@ -281,26 +288,11 @@ public class World : MonoBehaviour
         ChunkRenderer chunkRenderer = worldRenderer.RenderChunk(worldData, position, meshData);
         worldData.chunkDictionary.Add(position, chunkRenderer);
 
-        // After a chunk is created or modified, update its mesh
+        // After a chunk is created or modified
         chunkRenderer.UpdateChunk();
         chunkRenderer.BuildNavMeshForChunk();
     }
-    public void BuildGlobalNavMesh()
-    {
-        NavMeshSurface navMeshSurface = FindObjectOfType<NavMeshSurface>();
-        if (navMeshSurface != null)
-        {
-            try
-            {
-                navMeshSurface.BuildNavMesh();
-                Debug.Log("Built global NavMesh");
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Error building NavMesh: {e.Message}");
-            }
-        }
-    }
+
     internal bool SetBlock(RaycastHit hit, BlockType blockType)
     {
         ChunkRenderer chunk = hit.collider.GetComponent<ChunkRenderer>();

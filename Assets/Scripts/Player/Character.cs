@@ -399,7 +399,7 @@ public class Character : MonoBehaviour
         }
     }
 
-    public BlockType GetNextBlockType(BlockType currentBlock)
+    private BlockType GetNextBlockType(BlockType currentBlock)
     {
         switch (currentBlock)
         {
@@ -417,7 +417,7 @@ public class Character : MonoBehaviour
         world.SetBlock(hit, BlockType.Air);
     }
 
-    public void PlayExplosion(Vector3 position)
+    private void PlayExplosion(Vector3 position)
     {
         if (explosionPrefab != null)
         {
@@ -433,7 +433,7 @@ public class Character : MonoBehaviour
         AudioManager.instance.PlaySFX("Inventory Toggle");
     }
 
-    public BlockType GetLookedAtBlockType(RaycastHit hit)
+    private BlockType GetLookedAtBlockType(RaycastHit hit)
     {
         Vector3Int blockPos = new Vector3Int(
             Mathf.RoundToInt(hit.point.x - hit.normal.x / 2),

@@ -74,13 +74,6 @@ public class ChunkRenderer : MonoBehaviour
 
     public void BuildNavMeshForChunk()
     {
-        // Clean up any existing NavMesh objects
-        Transform existingNavMesh = transform.Find("ChunkNavMesh");
-        if (existingNavMesh != null)
-        {
-            Destroy(existingNavMesh.gameObject);
-        }
-
         // Create a simplified mesh for navigation
         Mesh navMesh = new Mesh();
 
@@ -89,7 +82,6 @@ public class ChunkRenderer : MonoBehaviour
         List<int> navTriangles = new List<int>();
 
         // For each block that's solid and has a block above that's air
-        int blocksAdded = 0;
         Chunk.LoopThroughTheBlocks(ChunkData, (x, y, z) => {
             BlockType blockType = ChunkData.blocks[Chunk.GetIndexFromPosition(ChunkData, x, y, z)];
             BlockType blockAbove = Chunk.GetBlockFromChunkCoordinates(ChunkData, x, y + 1, z);
@@ -99,18 +91,18 @@ public class ChunkRenderer : MonoBehaviour
                 // Add a simple quad for the top face
                 int baseIndex = navVertices.Count;
 
-                // Positions need to be in local space relative to the NavMesh object
-                Vector3 blockPos = new Vector3(
-                    x,
-                    y + 1, // Top of the block
-                    z
+                // Positions need to be in world space
+                Vector3 worldPos = new Vector3(
+                    ChunkData.worldPosition.x + x,
+                    ChunkData.worldPosition.y + y + 1, // Top of the block
+                    ChunkData.worldPosition.z + z
                 );
 
                 // Add the four corners of the top face
-                navVertices.Add(blockPos + new Vector3(0, 0, 0));
-                navVertices.Add(blockPos + new Vector3(1, 0, 0));
-                navVertices.Add(blockPos + new Vector3(1, 0, 1));
-                navVertices.Add(blockPos + new Vector3(0, 0, 1));
+                navVertices.Add(worldPos + new Vector3(0, 0, 0));
+                navVertices.Add(worldPos + new Vector3(1, 0, 0));
+                navVertices.Add(worldPos + new Vector3(1, 0, 1));
+                navVertices.Add(worldPos + new Vector3(0, 0, 1));
 
                 // Add two triangles for the quad
                 navTriangles.Add(baseIndex);
@@ -120,52 +112,21 @@ public class ChunkRenderer : MonoBehaviour
                 navTriangles.Add(baseIndex);
                 navTriangles.Add(baseIndex + 2);
                 navTriangles.Add(baseIndex + 3);
-
-                blocksAdded++;
             }
         });
-
-        // Only proceed if we have valid geometry
-        if (blocksAdded == 0)
-        {
-            return; // No walkable blocks in this chunk
-        }
 
         navMesh.vertices = navVertices.ToArray();
         navMesh.triangles = navTriangles.ToArray();
         navMesh.RecalculateNormals();
 
-        // Validate mesh
-        if (navMesh.vertices.Length == 0 || navMesh.triangles.Length == 0)
-        {
-            return; // Empty mesh, don't proceed
-        }
-
         // Create a new GameObject for the NavMesh
         GameObject navMeshObject = new GameObject("ChunkNavMesh");
         navMeshObject.transform.parent = this.transform;
         navMeshObject.transform.localPosition = Vector3.zero;
+        navMeshObject.AddComponent<MeshFilter>().mesh = navMesh;
+        navMeshObject.AddComponent<MeshRenderer>().enabled = false; // Make it invisible
 
-        // Add a mesh filter and collider
-        MeshFilter meshFilter = navMeshObject.AddComponent<MeshFilter>();
-        meshFilter.mesh = navMesh;
-
-        // Add a mesh collider (needed for NavMesh generation)
-        MeshCollider meshCollider = navMeshObject.AddComponent<MeshCollider>();
-        meshCollider.sharedMesh = navMesh;
-
-        // Make sure it doesn't interfere with gameplay physics
-        meshCollider.isTrigger = true;
-
-        // Set NavMesh Area to walkable
-        GameObjectUtility.SetNavMeshArea(navMeshObject, 0); // 0 = Walkable area
-
-        UnityEditor.GameObjectUtility.SetStaticEditorFlags(navMeshObject, StaticEditorFlags.NavigationStatic);
-
-        MeshRenderer meshRenderer = navMeshObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = new Material(Shader.Find("Standard"));
-        meshRenderer.material.color = new Color(0, 1, 0, 0.3f);
-
+        // You can now build your NavMesh using this object
     }
 
 #if UNITY_EDITOR

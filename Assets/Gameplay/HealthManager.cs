@@ -1,12 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class HealthManager : MonoBehaviour
 {
-    [Header("Game Over Settings")]
-    [SerializeField] private string gameOverSceneName = "GameOver";
+    [Header("Player References")]
+    [SerializeField] private Character playerCharacter;
 
     [Header("UI Elements")]
     [SerializeField] private Image healthBar;
@@ -20,20 +19,18 @@ public class HealthManager : MonoBehaviour
     private float healthAmount = 100f;
     private Coroutine damageEffectCoroutine;
 
-    private Character playerCharacter;
-
     private void Awake()
     {
-        playerCharacter = FindObjectOfType<Character>();
-
+        // Find player character if not assigned
         if (playerCharacter == null)
         {
-            Debug.LogError("No GameObject with Character script found in the scene!");
+            playerCharacter = FindObjectOfType<Character>();
         }
     }
 
     private void Start()
     {
+        // Initialize UI elements
         if (damageOverlay != null)
         {
             Color overlayColor = damageOverlay.color;
@@ -41,18 +38,29 @@ public class HealthManager : MonoBehaviour
             damageOverlay.color = overlayColor;
         }
 
+        // Subscribe to player health events
         if (playerCharacter != null)
         {
             playerCharacter.OnHealthChanged += UpdateHealthUI;
             playerCharacter.OnPlayerDeath += HandlePlayerDeath;
         }
 
+        // Initialize health UI
         UpdateHealthUI(playerCharacter.currentHealth, 100f);
     }
 
     void Update()
     {
+        // Debug controls (can be removed in final version)
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            playerCharacter.TakeDamage(20);
+        }
 
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            playerCharacter.Heal(15);
+        }
     }
 
     private void UpdateHealthUI(float currentHealth, float maxHealth)
@@ -122,31 +130,22 @@ public class HealthManager : MonoBehaviour
 
     private void HandlePlayerDeath()
     {
+        // Show death screen or game over UI
+        // This would typically trigger a game manager to handle restart/respawn
         Debug.Log("Player has died!");
 
-        // Show overlay at full alpha
+        // Example: Show overlay at full alpha
         if (damageOverlay != null)
         {
             Color overlayColor = damageOverlay.color;
             overlayColor.a = 1f;
             damageOverlay.color = overlayColor;
         }
-
-        // Transition to game over screen after a short delay
-        StartCoroutine(TransitionToGameOver());
-    }
-
-    private IEnumerator TransitionToGameOver()
-    {
-        // Wait for a moment so player can see death
-        yield return new WaitForSeconds(1.5f);
-
-        // Load game over scene
-        UnityEngine.SceneManagement.SceneManager.LoadScene(gameOverSceneName);
     }
 
     private void OnDestroy()
     {
+        // Unsubscribe from events
         if (playerCharacter != null)
         {
             playerCharacter.OnHealthChanged -= UpdateHealthUI;
