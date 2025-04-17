@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using Helper.Waiter;
+using UnityEngine.AI;
 
 public class GameManager : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class GameManager : MonoBehaviour
     {
         // Ensure time scale is set to 1 at start
         Time.timeScale = 1;
-
+        SetupNavMeshSurface();
         if (SaveSystem.ShouldLoadGame())
         {
             if (world == null)
@@ -171,14 +172,11 @@ public class GameManager : MonoBehaviour
 
                 StartCheckingTheMap();
 
-                // Build the navmesh for AI navigation
-                if (navMeshSurface != null)
-                {
-                    navMeshSurface.BuildNavMesh();
-                }
+                // Build the NavMesh after a delay to ensure all chunks have their NavMesh objects created
+                BuildNavMeshWithDelay(2f);
 
-                // Spawn enemies after a delay
-                Waiter.Wait(5f, () =>
+                // Spawn enemies after NavMesh is ready
+                Waiter.Wait(7f, () =>
                 {
                     if (dayNightCycleManager.activateLights)
                     {
@@ -227,7 +225,68 @@ public class GameManager : MonoBehaviour
         StopAllCoroutines();
         StartCoroutine(CheckIfShouldLoadNextPosition());
     }
+    private void BuildNavMeshWithDelay(float delay)
+    {
+        StartCoroutine(BuildNavMeshCoroutine(delay));
+    }
 
+    IEnumerator BuildNavMeshCoroutine(float delay)
+    {
+        // Wait for specified seconds before building the NavMesh
+        yield return new WaitForSeconds(delay);
+
+        // Now build the NavMesh
+        try
+        {
+            if (navMeshSurface != null)
+            {
+                Debug.Log("Building NavMesh...");
+                navMeshSurface.BuildNavMesh();
+                Debug.Log("NavMesh built successfully");
+            }
+            else
+            {
+                Debug.LogWarning("NavMeshSurface reference is missing");
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error building NavMesh: {e.Message}");
+        }
+    }
+    private void SetupNavMeshSurface()
+    {
+        // If navMeshSurface doesn't exist yet, create one
+        if (navMeshSurface == null)
+        {
+            // Try to find an existing NavMeshSurface in the scene
+            navMeshSurface = FindObjectOfType<NavMeshSurface>();
+
+            // If none exists, create a new one
+            if (navMeshSurface == null)
+            {
+                GameObject navMeshObject = new GameObject("NavMeshSurface");
+                navMeshSurface = navMeshObject.AddComponent<NavMeshSurface>();
+            }
+        }
+
+        // Configure the NavMeshSurface with appropriate settings
+        navMeshSurface.collectObjects = CollectObjects.All;
+        navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+        navMeshSurface.defaultArea = 0; // Walkable area
+
+        // Set appropriate layers to include in NavMesh generation
+        navMeshSurface.layerMask = LayerMask.GetMask("Default");
+
+        // Performance settings
+        navMeshSurface.overrideVoxelSize = true;
+        navMeshSurface.voxelSize = 0.25f; // Adjust based on your world scale
+        navMeshSurface.overrideTileSize = true;
+        navMeshSurface.tileSize = 256; // Larger tile size for voxel worlds
+
+        // Set a specific bounds to prevent the NavMesh from being too large
+        navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+    }
     IEnumerator CheckIfShouldLoadNextPosition()
     {
         yield return new WaitForSeconds(detectionTime);
