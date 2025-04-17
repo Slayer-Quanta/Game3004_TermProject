@@ -423,9 +423,14 @@ public class Character : MonoBehaviour
             Debug.LogError("[Character] Projectile missing Projectile script.");
         }
 
-        // Visual debug
+        // ✅ Play "Attack" SFX from your AudioManager
+        AudioManager.instance.PlayAttackSound();
+
+        // Optional: Visual debug ray
         Debug.DrawRay(shootOrigin, shootDirection * 5f, Color.green, 2f);
     }
+
+
 
 
     private IEnumerator DamageEffect()
