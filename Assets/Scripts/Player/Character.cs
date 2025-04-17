@@ -401,25 +401,32 @@ public class Character : MonoBehaviour
 
     public void Shoot()
     {
-        if (projectilePrefab == null || firePoint == null)
+        if (projectilePrefab == null || mainCamera == null)
         {
-            Debug.LogWarning("[Character] Projectile prefab or firePoint not assigned!");
+            Debug.LogWarning("[Character] Missing projectile prefab or camera!");
             return;
         }
 
-        GameObject projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+        Vector3 shootOrigin = mainCamera.transform.position + mainCamera.transform.forward * 1.2f;
+        Vector3 shootDirection = mainCamera.transform.forward;
+
+        GameObject projectile = Instantiate(projectilePrefab, shootOrigin, Quaternion.LookRotation(shootDirection));
+
         if (projectile.TryGetComponent(out Projectile projectileScript))
         {
-            Vector3 shootDirection = firePoint.forward;
             projectileScript.speed = projectileSpeed;
             projectileScript.Initialize(shootDirection);
             Debug.Log("[Character] Projectile shot.");
         }
         else
         {
-            Debug.LogError("[Character] Projectile prefab missing Projectile script!");
+            Debug.LogError("[Character] Projectile missing Projectile script.");
         }
+
+        // Visual debug
+        Debug.DrawRay(shootOrigin, shootDirection * 5f, Color.green, 2f);
     }
+
 
     private IEnumerator DamageEffect()
     {

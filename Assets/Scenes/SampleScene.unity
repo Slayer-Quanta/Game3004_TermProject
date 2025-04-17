@@ -2899,13 +2899,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d1aa9a9e0c7b154e930a65426d113e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainCamera: {fileID: 0}
+  playerInput: {fileID: 0}
+  playerMovement: {fileID: 0}
+  pauseMenu: {fileID: 0}
+  explosionPrefab: {fileID: 0}
+  headTransform: {fileID: 0}
   maxHealth: 100
   currentHealth: 0
   healthBar: {fileID: 887027784}
   healthRegenRate: 5
   healthRegenDelay: 3
+  interactionRayLength: 5
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 0
+  fly: 0
+  animator: {fileID: 0}
+  world: {fileID: 0}
+  holdTimeToDestroy: 3
+  headTiltAmount: 5
+  headTiltSpeed: 3
   projectilePrefab: {fileID: 2849736765041944520, guid: 8f575aadf74c4c2479a2de29da0c0980, type: 3}
-  firePoint: {fileID: 4018737564156553510, guid: 4eea7ff46fe2b744681a792d1acf9fdf, type: 3}
+  firePoint: {fileID: 0}
   projectileSpeed: 15
 --- !u!1 &742801424
 GameObject:
