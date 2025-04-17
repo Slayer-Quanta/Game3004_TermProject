@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
 using System.Collections;
@@ -46,6 +46,7 @@ public class Enemy : MonoBehaviour
     private Rigidbody enemyRigidbody;
 
     [Header("Touch Damage Over Time")]
+    public float contactDamage = 5f;                      // ✅ Separate contact damage
     public float contactDamageCooldown = 1.5f;
     private float nextTouchDamageTime = 0f;
 
@@ -138,10 +139,10 @@ public class Enemy : MonoBehaviour
         if (playerCharacter != null && playerInRange && !isDead)
         {
             playerCharacter.TakeDamage(attackDamage);
+
             if (attackEffectPrefab != null)
             {
-                Vector3 effectPosition = player.position;
-                effectPosition.y += 1f;
+                Vector3 effectPosition = player.position + Vector3.up;
                 Instantiate(attackEffectPrefab, effectPosition, Quaternion.identity);
             }
 
@@ -149,6 +150,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    // ✅ Touch-based damage (separate from attack animation)
     private void OnTriggerStay(Collider other)
     {
         if (isDead || Time.time < nextTouchDamageTime)
@@ -160,7 +162,7 @@ public class Enemy : MonoBehaviour
             if (player != null && !player.IsDead())
             {
                 Debug.Log("[Enemy] Dealing contact damage to player.");
-                player.TakeDamage(attackDamage);
+                player.TakeDamage(contactDamage);
                 nextTouchDamageTime = Time.time + contactDamageCooldown;
 
                 if (attackEffectPrefab != null)
