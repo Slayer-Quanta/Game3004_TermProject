@@ -1,8 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Character : MonoBehaviour
 {
@@ -12,6 +11,9 @@ public class Character : MonoBehaviour
     [SerializeField] private PauseSystem pauseMenu;
     [SerializeField] private GameObject explosionPrefab;
     [SerializeField] private Transform headTransform;
+
+    [Header("Game Over")]
+    [SerializeField] private string gameOverSceneName = "GameOverScene"; // Scene to load when player dies
 
     [Header("Health System")]
     [SerializeField] private float maxHealth = 100f;
@@ -83,10 +85,38 @@ public class Character : MonoBehaviour
 
     private void OnDestroy()
     {
-        playerInput.OnMouseClick -= HandleMouseClick;
-        playerInput.OnFly -= HandleFlyClick;
-        playerInput.OnPause -= PauseSystem.self.TogglePause;
-        playerInput.OnInventoryToggle -= ToggleInventory;
+        // Unsubscribe from events to prevent memory leaks
+        if (playerInput != null)
+        {
+            playerInput.OnMouseClick -= HandleMouseClick;
+            playerInput.OnFly -= HandleFlyClick;
+
+            if (pauseMenu != null)
+                playerInput.OnPause -= pauseMenu.TogglePause;
+            else if (PauseSystem.self != null)
+                playerInput.OnPause -= PauseSystem.self.TogglePause;
+
+            playerInput.OnInventoryToggle -= ToggleInventory;
+        }
+
+        // If being destroyed and player is dead, load game over scene
+        if (isDead && string.IsNullOrEmpty(gameOverSceneName) == false)
+        {
+            // Save the game before transitioning to Game Over
+            if (world != null && PauseSystem.self != null)
+            {
+                PauseSystem.self.SaveGame();
+            }
+
+            // Show loading screen if available
+            if (LoadingScreen.Instance != null)
+            {
+                LoadingScreen.Instance.ShowLoadingScreen();
+            }
+
+            // Load the game over scene after a short delay
+            SceneManager.LoadScene(gameOverSceneName);
+        }
     }
 
     private void Update()
@@ -224,9 +254,42 @@ public class Character : MonoBehaviour
     {
         isDead = true;
         Debug.Log("[Player] Died.");
-        playerMovement.enabled = false;
-        playerInput.enabled = false;
+
+        // Disable components
+        if (playerMovement != null)
+            playerMovement.enabled = false;
+
+        if (playerInput != null)
+            playerInput.enabled = false;
+
+        // Trigger death event
         OnPlayerDeath?.Invoke();
+
+        // Play explosion at player position
+        if (explosionPrefab != null)
+        {
+            GameObject explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+            ParticleSystem particles = explosion.GetComponent<ParticleSystem>();
+            if (particles != null)
+            {
+                particles.Play();
+            }
+        }
+
+        // Play death sound
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlaySFX("Death");
+        }
+
+        // Set animation if available
+        if (animator != null)
+        {
+            animator.SetTrigger("death");
+        }
+
+        // Character will be destroyed by the game system,
+        // and the OnDestroy method will handle loading the game over scene
     }
 
     private void HandleFlyClick()
@@ -430,9 +493,6 @@ public class Character : MonoBehaviour
         Debug.DrawRay(shootOrigin, shootDirection * 5f, Color.green, 2f);
     }
 
-
-
-
     private IEnumerator DamageEffect()
     {
         Vector3 originalPosition = mainCamera.transform.localPosition;
@@ -457,5 +517,4 @@ public class Character : MonoBehaviour
 
         mainCamera.transform.localPosition = originalPosition;
     }
-
 }

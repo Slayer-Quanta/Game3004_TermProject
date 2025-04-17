@@ -8,57 +8,20 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject mainMenuCanvas;
     [SerializeField] private GameObject optionsPanel;
     [SerializeField] private GameObject settingsPanel;
-    [SerializeField] private GameObject worldCreationCanvas;
+    //[SerializeField] private GameObject worldCreationCanvas;
 
     private string savePath => Application.persistentDataPath + "/savegame.json";
 
     private void Start()
     {
-        worldCreationCanvas.SetActive(false);
+    //    worldCreationCanvas.SetActive(false);
     }
 
     public void PlayGame()
     {
         SaveSystem.DeleteSave();  // Clear any previous save file to start fresh
         AudioManager.instance.PlayButtonClick();
-
-        // Show loading screen before loading the scene
-        LoadingScreen.Instance.ShowLoadingScreen();
-
-        // Load the scene asynchronously
-        StartCoroutine(LoadGameSceneAsync(4));
-    }
-
-    private IEnumerator LoadGameSceneAsync(int sceneIndex)
-    {
-        // Begin loading the scene
-        AsyncOperation operation = SceneManager.LoadSceneAsync(sceneIndex);
-
-        // Don't let the scene activate until we allow it
-        operation.allowSceneActivation = false;
-
-        // While the scene loads
-        while (!operation.isDone)
-        {
-            // Update the progress bar (normalized progress goes from 0 to 0.9)
-            float progress = Mathf.Clamp01(operation.progress / 0.9f);
-            LoadingScreen.Instance.UpdateProgress(progress);
-
-            // If the load has finished
-            if (operation.progress >= 0.9f)
-            {
-                // Wait for a short delay to show the last loading message
-                yield return new WaitForSeconds(1f);
-
-                // Activate the scene
-                operation.allowSceneActivation = true;
-            }
-
-            yield return null;
-        }
-
-        // Hide loading screen when done (though likely won't be seen as we're changing scenes)
-        LoadingScreen.Instance.HideLoadingScreen();
+        SceneManager.LoadSceneAsync(4);
     }
 
     public void LoadGame()
@@ -66,24 +29,20 @@ public class MainMenu : MonoBehaviour
         if (SaveSystem.ShouldLoadGame())
         {
             AudioManager.instance.PlayButtonClick();
-
-            // Show loading screen before loading the scene
-            LoadingScreen.Instance.ShowLoadingScreen();
-
-            // Load the scene asynchronously
-            StartCoroutine(LoadGameSceneAsync(4));
+            SceneManager.LoadSceneAsync(4);
         }
         else
         {
             Debug.Log("No saved game found.");
         }
     }
-    public void ToggleWorldCreationCanvas()
-    {
-        bool isActive = worldCreationCanvas.activeSelf;
-        worldCreationCanvas.SetActive(!isActive);
-        mainMenuCanvas.SetActive(isActive);
-    }
+
+    //public void ToggleWorldCreationCanvas()
+    //{
+    //    bool isActive = worldCreationCanvas.activeSelf;
+    //    worldCreationCanvas.SetActive(!isActive);
+    //    mainMenuCanvas.SetActive(isActive);
+    //}
 
     public void Options()
     {
@@ -133,19 +92,19 @@ public class MainMenu : MonoBehaviour
         Debug.Log("Game is exiting...");
     }
 
-    public void ShowSettingsPanel()
-    {
-        AudioManager.instance.PlayButtonClick();
-        optionsPanel.SetActive(false);
-        settingsPanel.SetActive(true);
-    }
+    //public void ShowSettingsPanel()
+    //{
+    //    AudioManager.instance.PlayButtonClick();
+    //    optionsPanel.SetActive(false);
+    //    settingsPanel.SetActive(true);
+    //}
 
-    public void ShowOptionsPanel()
-    {
-        AudioManager.instance.PlayButtonClick();
-        settingsPanel.SetActive(false);
-        optionsPanel.SetActive(true);
-    }
+    //public void ShowOptionsPanel()
+    //{
+    //    AudioManager.instance.PlayButtonClick();
+    //    settingsPanel.SetActive(false);
+    //    optionsPanel.SetActive(true);
+    //}
 
     public void KeyboardOptions()
     {

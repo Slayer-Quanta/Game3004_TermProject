@@ -27,7 +27,6 @@ public class GameManager : MonoBehaviour
     public Vector2 enemySpawnRangeY = new Vector2(-100, 100);
     List<Enemy> enemies = new List<Enemy>();
 
-
     private void Start()
     {
         // Ensure time scale is set to 1 at start
@@ -44,14 +43,7 @@ public class GameManager : MonoBehaviour
                     return;
                 }
             }
-            else
-            {
-                // Show loading screen before starting a new game
-                if (LoadingScreen.Instance != null)
-                    LoadingScreen.Instance.ShowLoadingScreen();
 
-                StartNewGame();
-            }
             // Initialize worldData if needed
             if (world.worldData == null)
             {
@@ -105,13 +97,13 @@ public class GameManager : MonoBehaviour
                 Debug.LogError("Failed to load game. Starting new game instead.");
                 StartNewGame();
             }
-
         }
         else
         {
             StartNewGame();
         }
     }
+
     private void SetupPlayerReferences()
     {
         if (player != null)
@@ -133,10 +125,6 @@ public class GameManager : MonoBehaviour
             {
                 playerController.enabled = true;
             }
-
-            // Make sure loading screen is hidden when player is ready
-            if (LoadingScreen.Instance != null)
-                LoadingScreen.Instance.HideLoadingScreen();
         }
     }
 

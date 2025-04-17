@@ -1294,8 +1294,6 @@ GameObject:
   - component: {fileID: 521072756}
   - component: {fileID: 521072759}
   - component: {fileID: 521072760}
-  - component: {fileID: 521072761}
-  - component: {fileID: 521072762}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1436,42 +1434,6 @@ MonoBehaviour:
   mainMenuCanvas: {fileID: 1928616175}
   optionsPanel: {fileID: 0}
   settingsPanel: {fileID: 0}
-  worldCreationCanvas: {fileID: 61383060}
---- !u!114 &521072761
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 521072755}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1dc347679cace74499c18096bee65a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  loadingCanvas: {fileID: 1527538056}
-  progressBar: {fileID: 1247982045}
-  progressTextObject: {fileID: 579936613}
-  loadingMessageObject: {fileID: 579936613}
-  loadingMessages:
-  - Generating terrain...
-  - Placing trees...
-  - Creating chunks...
-  - Building world...
---- !u!114 &521072762
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 521072755}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e9ef18aefc86544eb3cd424ae07564b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  loadingManager: {fileID: 521072761}
-  totalSteps: 10
 --- !u!1 &579936613
 GameObject:
   m_ObjectHideFlags: 0

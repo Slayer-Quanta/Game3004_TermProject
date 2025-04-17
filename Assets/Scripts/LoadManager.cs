@@ -20,9 +20,9 @@ public class LoadingScreen : MonoBehaviour
         "Building world..."
     };
 
-    // Cache for TMP components (will be found via GetComponent at runtime)
     private Component progressTextComponent;
     private Component loadingMessageComponent;
+    private Coroutine messageCoroutine;
 
     private static LoadingScreen _instance;
     public static LoadingScreen Instance
@@ -42,13 +42,14 @@ public class LoadingScreen : MonoBehaviour
         if (_instance == null)
         {
             _instance = this;
+            DontDestroyOnLoad(gameObject); 
         }
         else if (_instance != this)
         {
             Destroy(gameObject);
+            return;
         }
 
-        // Get the actual text components (either regular Text or TMP)
         if (progressTextObject != null)
         {
             progressTextComponent = progressTextObject.GetComponent("TMPro.TMP_Text") ??
@@ -64,18 +65,33 @@ public class LoadingScreen : MonoBehaviour
         // Start with loading screen hidden
         HideLoadingScreen();
     }
-
     public void ShowLoadingScreen()
     {
+        if (loadingCanvas == null) return;
+
         loadingCanvas.gameObject.SetActive(true);
         UpdateProgress(0f);
-        StartCoroutine(CycleLoadingMessages());
+
+        // Stop any existing coroutine before starting a new one
+        if (messageCoroutine != null)
+        {
+            StopCoroutine(messageCoroutine);
+        }
+        messageCoroutine = StartCoroutine(CycleLoadingMessages());
     }
 
     public void HideLoadingScreen()
     {
-        StopAllCoroutines();
-        loadingCanvas.gameObject.SetActive(false);
+        if (messageCoroutine != null)
+        {
+            StopCoroutine(messageCoroutine);
+            messageCoroutine = null;
+        }
+
+        if (loadingCanvas != null)
+        {
+            loadingCanvas.gameObject.SetActive(false);
+        }
     }
 
     public void UpdateProgress(float progress)
@@ -91,7 +107,7 @@ public class LoadingScreen : MonoBehaviour
     {
         int index = 0;
 
-        while (loadingCanvas.gameObject.activeSelf)
+        while (loadingCanvas != null && loadingCanvas.gameObject.activeSelf)
         {
             if (loadingMessageComponent != null && loadingMessages.Length > 0)
             {
@@ -101,12 +117,24 @@ public class LoadingScreen : MonoBehaviour
 
             yield return new WaitForSeconds(2f);
         }
+
+        messageCoroutine = null;
     }
 
     // Helper method to set text on either TMP_Text or Text component
     private void SetTextValue(Component textComponent, string value)
     {
+        if (textComponent == null) return;
+
         System.Type type = textComponent.GetType();
         type.GetProperty("text")?.SetValue(textComponent, value);
+    }
+
+    private void OnDestroy()
+    {
+        if (_instance == this)
+        {
+            _instance = null;
+        }
     }
 }
